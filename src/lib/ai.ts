@@ -6,10 +6,10 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 // Configure model with safety settings
 const model = genAI.getGenerativeModel({
-  model: 'gemini-2.0-flash-exp', // ✅ Latest flash model
+  model: 'gemini-2.0-flash-exp',
   generationConfig: {
     temperature: 0.7,
-    maxOutputTokens: 8192, // ✅ Maximum tokens for long responses
+    maxOutputTokens: 8192,
     topP: 0.95,
   },
   safetySettings: [
@@ -47,8 +47,8 @@ export interface AnswerEvaluation {
   confidenceTips: string[];
 }
 
-// Generate interview questions
-export async function generateQuestions(
+// ✅ Generate interview questions - CORRECT FUNCTION NAME
+export async function generateInterviewQuestions(
   skill: string,
   difficulty: 'easy' | 'medium' | 'hard',
   count: number = 5
@@ -79,13 +79,11 @@ Requirements:
     const result = await model.generateContent(prompt);
     const response = result.response;
 
-    // Check if response was blocked
     if (!response || response.promptFeedback?.blockReason) {
       console.error('❌ Response blocked:', response?.promptFeedback);
       throw new Error(`Response blocked: ${response?.promptFeedback?.blockReason}`);
     }
 
-    // Get full text - NO CHARACTER LIMIT
     let text = response.text();
     
     if (!text || text.trim().length === 0) {
@@ -94,15 +92,13 @@ Requirements:
     }
 
     console.log('📝 Full response length:', text.length);
-    console.log('📝 Full response:', text); // ✅ Complete response logged
+    console.log('📝 Full response:', text);
 
-    // Clean the response
     text = text.trim();
     text = text.replace(/``````\n?/g, '');
     text = text.replace(/^\s*[\r\n]/gm, '');
     text = text.trim();
 
-    // Try to extract JSON array
     const jsonMatch = text.match(/\[[\s\S]*\]/);
     if (jsonMatch) {
       text = jsonMatch[0];
@@ -112,14 +108,12 @@ Requirements:
       throw new Error('No valid JSON array in response');
     }
 
-    // Parse and validate
     const questions = JSON.parse(text);
 
     if (!Array.isArray(questions) || questions.length === 0) {
       throw new Error('Invalid questions format');
     }
 
-    // Validate question structure
     const validQuestions = questions.filter(q => 
       q && typeof q.question === 'string' && q.question.length > 0
     );
@@ -127,7 +121,7 @@ Requirements:
     console.log('✅ Generated questions:', validQuestions.length);
 
     return validQuestions.map((q) => ({
-      question: q.question, // ✅ Full question, no truncation
+      question: q.question,
       difficulty: difficulty,
       topic: q.topic || skill,
     }));
@@ -139,7 +133,7 @@ Requirements:
   }
 }
 
-// Evaluate answer
+// ✅ Evaluate answer - CORRECT FUNCTION NAME
 export async function evaluateAnswer(
   question: string,
   userAnswer: string,
@@ -147,7 +141,7 @@ export async function evaluateAnswer(
 ): Promise<AnswerEvaluation> {
   try {
     console.log('🎯 Evaluating answer');
-    console.log('Question:', question); // ✅ Full question
+    console.log('Question:', question);
     console.log('Answer length:', userAnswer.length);
     console.log('🤖 Evaluating answer with Gemini...');
 
@@ -183,13 +177,11 @@ Requirements:
     const result = await model.generateContent(prompt);
     const response = result.response;
 
-    // Check if response was blocked
     if (!response || response.promptFeedback?.blockReason) {
       console.error('❌ Response blocked:', response?.promptFeedback);
       throw new Error(`Response blocked: ${response?.promptFeedback?.blockReason}`);
     }
 
-    // Get full text - NO CHARACTER LIMIT
     let text = response.text();
     
     if (!text || text.trim().length === 0) {
@@ -198,15 +190,13 @@ Requirements:
     }
 
     console.log('📝 Full evaluation length:', text.length);
-    console.log('📝 Full evaluation:', text); // ✅ Complete evaluation logged
+    console.log('📝 Full evaluation:', text);
 
-    // Clean response
     text = text.trim();
     text = text.replace(/``````\n?/g, '');
     text = text.replace(/^\s*[\r\n]/gm, '');
     text = text.trim();
 
-    // Try to extract JSON object
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       text = jsonMatch[0];
@@ -216,10 +206,8 @@ Requirements:
       throw new Error('No valid JSON in response');
     }
 
-    // Parse JSON
     const evaluation = JSON.parse(text);
 
-    // Validate structure
     if (
       typeof evaluation.score !== 'number' ||
       evaluation.score < 0 ||
@@ -237,17 +225,16 @@ Requirements:
 
     return {
       score: Math.round(evaluation.score),
-      feedback: evaluation.feedback, // ✅ Full feedback, no truncation
-      strengths: evaluation.strengths, // ✅ All strengths
-      improvements: evaluation.improvements, // ✅ All improvements
-      confidenceTips: evaluation.confidenceTips, // ✅ All tips
+      feedback: evaluation.feedback,
+      strengths: evaluation.strengths,
+      improvements: evaluation.improvements,
+      confidenceTips: evaluation.confidenceTips,
     };
 
   } catch (error) {
     console.error('❌ Evaluation error:', error);
     console.log('📋 Using fallback evaluation');
 
-    // Better fallback based on answer
     const answerLength = userAnswer.trim().length;
     const hasContent = answerLength > 20;
     const hasDetail = answerLength > 100;
@@ -283,7 +270,7 @@ Requirements:
   }
 }
 
-// Fallback questions - REDUCED TO 5 PER SKILL
+// Fallback questions - 5 per skill
 function generateFallbackQuestions(skill: string, count: number): InterviewQuestion[] {
   const fallbackQuestions: Record<string, InterviewQuestion[]> = {
     'System Design': [
@@ -423,7 +410,6 @@ function generateFallbackQuestions(skill: string, count: number): InterviewQuest
     ],
   };
 
-  // Get questions for skill or use generic ones
   const questions = fallbackQuestions[skill] || [
     {
       question: `Explain the fundamental concepts and best practices in ${skill}. Provide specific examples and discuss common patterns or architectures used in production environments.`,
@@ -455,4 +441,5 @@ function generateFallbackQuestions(skill: string, count: number): InterviewQuest
   return questions.slice(0, count);
 }
 
+// ✅ Export everything properly
 export { model, genAI };
