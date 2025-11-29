@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCustomAuth } from '@/hooks/useCustomAuth';
+import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import PerformanceChart from '@/components/charts/PerformanceChart'; // ✅ Added
@@ -64,35 +65,47 @@ export default function DashboardPage() {
   }, [isLoading, isSignedIn, router]);
 
   // ✅ Added function
-  const generateChartData = (interviews: Interview[]): PerformanceData[] => {
-    const completed = interviews.filter(i => i.isCompleted);
+const generateChartData = (interviews: Interview[]): PerformanceData[] => {
+  const completed = interviews.filter(i => i.isCompleted);
+  
+  if (completed.length === 0) return [];
+
+  // Sort by date
+  const sorted = [...completed].sort((a, b) => 
+    new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  );
+
+  // Group by date only
+  const grouped = sorted.reduce((acc: Record<string, { scores: number[], count: number, timestamp: number }>, interview) => {
+    const dateObj = new Date(interview.createdAt);
+    const date = dateObj.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric',
+      year: 'numeric'
+    });
     
-    if (completed.length === 0) return [];
+    if (!acc[date]) {
+      acc[date] = { scores: [], count: 0, timestamp: dateObj.getTime() };
+    }
+    
+    acc[date].scores.push(interview.avgScore || 0);
+    acc[date].count += 1;
+    
+    return acc;
+  }, {});
 
-    const grouped = completed.reduce((acc: Record<string, { scores: number[], count: number }>, interview) => {
-      const date = new Date(interview.createdAt).toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric' 
-      });
-      
-      if (!acc[date]) {
-        acc[date] = { scores: [], count: 0 };
-      }
-      
-      acc[date].scores.push(interview.avgScore || 0);
-      acc[date].count += 1;
-      
-      return acc;
-    }, {});
+  // Convert to array in chronological order
+  return Object.entries(grouped)
+    .map(([date, data]) => ({
+      date,
+      score: Math.round(data.scores.reduce((a, b) => a + b, 0) / data.scores.length * 10) / 10,
+      interviews: data.count,
+      timestamp: data.timestamp
+    }))
+    .sort((a, b) => a.timestamp - b.timestamp)
+    .slice(-14); // Last 14 days
+};
 
-    return Object.entries(grouped)
-      .map(([date, data]) => ({
-        date,
-        score: Math.round(data.scores.reduce((a, b) => a + b, 0) / data.scores.length),
-        interviews: data.count,
-      }))
-      .slice(-7);
-  };
 
   useEffect(() => {
     async function fetchInterviews() {
@@ -400,6 +413,7 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
+      <Footer />
     </div>
   );
 }

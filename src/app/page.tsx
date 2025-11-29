@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useCustomAuth } from '@/hooks/useCustomAuth';
 import { Button } from '@/components/ui/button';
+import Footer from '@/components/Footer';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   Brain,
@@ -234,6 +235,7 @@ export default function LandingPage() {
           </Link>
         </div>
       </section>
+      <Footer />
     </div>
   );
 }

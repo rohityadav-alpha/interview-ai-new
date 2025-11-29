@@ -5,6 +5,7 @@ import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCustomAuth } from '@/hooks/useCustomAuth';
 import { Button } from '@/components/ui/button';
+import Footer from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle, TrendingUp, Clock, FileDown, Home, Target, Award, AlertCircle, Sparkles, Brain } from 'lucide-react';
 import Link from 'next/link';
@@ -418,6 +419,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
           </Link>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

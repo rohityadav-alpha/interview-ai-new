@@ -43,13 +43,13 @@ export default function Footer() {
           <div>
             <h3 className="font-semibold mb-4">Connect</h3>
             <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-white">
+              <a href="https://github.com/rohityadav-alpha" className="text-gray-400 hover:text-white">
                 <Github className="w-5 h-5" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-white">
+              <a href="https://www.linkedin.com/in/rohit-yadav-a7636b36a/?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=member_default" className="text-gray-400 hover:text-white">
                 <Linkedin className="w-5 h-5" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-white">
+              <a href="mailto:rohityadav474747@gmail.com" className="text-gray-400 hover:text-white">
                 <Mail className="w-5 h-5" />
               </a>
             </div>
