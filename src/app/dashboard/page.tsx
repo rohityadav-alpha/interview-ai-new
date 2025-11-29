@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useCustomAuth } from '@/hooks/useCustomAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import PerformanceChart from '@/components/charts/PerformanceChart'; // ✅ Added
 import { 
   Brain, 
   Trophy, 
@@ -41,11 +42,19 @@ interface Stats {
   totalTime: number;
 }
 
+// ✅ Added interface
+interface PerformanceData {
+  date: string;
+  score: number;
+  interviews: number;
+}
+
 export default function DashboardPage() {
   const router = useRouter();
   const { isSignedIn, isLoading, userName, userEmail } = useCustomAuth();
   const [interviews, setInterviews] = useState<Interview[]>([]);
   const [stats, setStats] = useState<Stats>({ total: 0, avgScore: 0, totalTime: 0 });
+  const [performanceData, setPerformanceData] = useState<PerformanceData[]>([]); // ✅ Added
   const [isLoadingData, setIsLoadingData] = useState(true);
 
   useEffect(() => {
@@ -53,6 +62,37 @@ export default function DashboardPage() {
       router.push('/sign-in');
     }
   }, [isLoading, isSignedIn, router]);
+
+  // ✅ Added function
+  const generateChartData = (interviews: Interview[]): PerformanceData[] => {
+    const completed = interviews.filter(i => i.isCompleted);
+    
+    if (completed.length === 0) return [];
+
+    const grouped = completed.reduce((acc: Record<string, { scores: number[], count: number }>, interview) => {
+      const date = new Date(interview.createdAt).toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric' 
+      });
+      
+      if (!acc[date]) {
+        acc[date] = { scores: [], count: 0 };
+      }
+      
+      acc[date].scores.push(interview.avgScore || 0);
+      acc[date].count += 1;
+      
+      return acc;
+    }, {});
+
+    return Object.entries(grouped)
+      .map(([date, data]) => ({
+        date,
+        score: Math.round(data.scores.reduce((a, b) => a + b, 0) / data.scores.length),
+        interviews: data.count,
+      }))
+      .slice(-7);
+  };
 
   useEffect(() => {
     async function fetchInterviews() {
@@ -64,6 +104,10 @@ export default function DashboardPage() {
           const data = await response.json();
           setInterviews(data.interviews || []);
           setStats(data.stats || { total: 0, avgScore: 0, totalTime: 0 });
+          
+          // ✅ Generate chart data
+          const chartData = generateChartData(data.interviews || []);
+          setPerformanceData(chartData);
         }
       } catch (error) {
         console.error('Failed to fetch interviews:', error);
@@ -204,6 +248,13 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* ✅ Performance Chart - NEW */}
+        {interviews.length > 0 && (
+          <div className="mb-8">
+            <PerformanceChart data={performanceData} />
+          </div>
+        )}
 
         {/* Recent Interviews */}
         <Card className="shadow-xl border-2 border-purple-200 dark:border-purple-800 bg-white dark:bg-slate-800">
