@@ -19,7 +19,7 @@ export default function SimpleFaceTracker({ isInterviewActive }: SimpleFaceTrack
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const timerRef = useRef<NodeJS.Timeout>();
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Timer effect
   useEffect(() => {

@@ -155,7 +155,7 @@ export function generatePDFReport(data: ReportData): boolean {
       
       // Score badge
       if (q.aiScore) {
-        const scoreColor = q.aiScore >= 8 ? [22, 163, 74] : q.aiScore >= 6 ? [37, 99, 235] : [239, 68, 68];
+        const scoreColor: [number, number, number] = q.aiScore >= 8 ? [22, 163, 74] : q.aiScore >= 6 ? [37, 99, 235] : [239, 68, 68];
         doc.setFillColor(...scoreColor);
         doc.roundedRect(20, yPos, 25, 8, 2, 2, 'F');
         doc.setTextColor(255, 255, 255);
@@ -251,7 +251,7 @@ export function generatePDFReport(data: ReportData): boolean {
     });
     
     // Footer on each page
-    const pageCount = doc.getNumberOfPages();
+    const pageCount = (doc as any).internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
       doc.setFontSize(8);

@@ -49,10 +49,10 @@ export default function InterviewPage({ params }: { params: Promise<{ id: string
   const [startTime] = useState(Date.now());
   const [inputMode, setInputMode] = useState<'voice' | 'text'>('text');
   
-  const recognitionRef = useRef<any>(null);
-  const isRecordingRef = useRef(false);
-  const timerRef = useRef<NodeJS.Timeout>();
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+ const recognitionRef = useRef<any>(null);
+const isRecordingRef = useRef(false);
+const timerRef = useRef<NodeJS.Timeout | null>(null); // ✅ Fixed
+const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auth check
   useEffect(() => {

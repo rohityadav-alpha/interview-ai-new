@@ -6,14 +6,18 @@ const nextConfig: NextConfig = {
       allowedOrigins: [
         'localhost:3000',
         '*.devtunnels.ms',
-        '*.vercel.app', // Add Vercel domains
+        '*.vercel.app',
       ],
     },
   },
-  optimizeFonts: true,
-  // Add these for production
+  // ✅ Use remotePatterns instead of domains
   images: {
-    domains: ['img.clerk.com'], // Clerk profile images
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'img.clerk.com',
+      },
+    ],
   },
 };
 

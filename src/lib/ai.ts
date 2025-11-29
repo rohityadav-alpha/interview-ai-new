@@ -61,7 +61,7 @@ IMPORTANT: Return ONLY a valid JSON array, no markdown, no explanations:
     // Extract JSON array
     const jsonMatch = text.match(/\[[\s\S]*\]/);
     if (jsonMatch) {
-      text = jsonMatch;
+      text = jsonMatch[0];
     } else {
       console.error('❌ No JSON array found in response');
       return generateFallbackQuestions(skill, count);
