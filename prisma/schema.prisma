@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int      @id @default(autoincrement())
+  clerkUserId String   @unique @map("clerk_user_id")
+  email       String
+  firstName   String?  @map("first_name")
+  lastName    String?  @map("last_name")
+  username    String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Interview {
+  id                 Int                 @id @default(autoincrement())
+  clerkUserId        String              @map("clerk_user_id")
+  userEmail          String              @map("user_email")
+  userFirstName      String?             @map("user_first_name")
+  userLastName       String?             @map("user_last_name")
+  userUsername       String?             @map("user_username")
+  skill              String
+  difficulty         String              @default("medium")
+  totalScore         Int                 @default(0) @map("total_score")
+  avgScore           Decimal             @default(0) @map("avg_score") @db.Decimal(4, 2)
+  questionsAttempted Int                 @default(0) @map("questions_attempted")
+  interviewDuration  Int                 @default(0) @map("interview_duration")
+  isCompleted        Boolean             @default(false) @map("is_completed")
+  improvements       String?
+  confidenceTips     String?             @map("confidence_tips")
+  strengths          Json?
+  createdAt          DateTime            @default(now()) @map("created_at")
+  updatedAt          DateTime            @updatedAt @map("updated_at")
+  responses          InterviewResponse[]
+
+  @@index([clerkUserId])
+  @@index([isCompleted])
+  @@map("interviews")
+}
+
+model InterviewResponse {
+  id             Int       @id @default(autoincrement())
+  interviewId    Int       @map("interview_id")
+  questionNumber Int       @map("question_number")
+  question       String    @db.Text
+  userAnswer     String?   @map("user_answer") @db.Text
+  aiScore        Int?      @map("ai_score")
+  aiFeedback     String?   @map("ai_feedback") @db.Text
+  strengths      String?   @db.Text              // ✅ ADD THIS
+  improvements   String?   @db.Text              // ✅ ADD THIS
+  confidenceTips String?   @map("confidence_tips") @db.Text  // ✅ ADD THIS
+  timeTaken      Int?      @map("time_taken")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  interview      Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+
+  @@index([interviewId])
+  @@map("interview_responses")
+}
+
