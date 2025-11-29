@@ -122,20 +122,19 @@ export async function evaluateAnswer(
     
     const prompt = `Evaluate this ${skill} interview answer.
 
-Question: ${question}
-Candidate's Answer: ${answer}
+      Question: ${question}
+      Candidate's Answer: ${answer}
 
-CRITICAL: Return ONLY valid JSON in this exact format (no extra text):
-{"score": 7, "feedback": "detailed feedback here", "strengths": ["strength 1", "strength 2", "strength 3"], "improvements": ["improvement 1", "improvement 2", "improvement 3"], "confidenceTips": ["tip 1", "tip 2", "tip 3"]}
+      CRITICAL: Return ONLY valid JSON in this exact format (no extra text):
+      {"score": 7, "feedback": "detailed feedback here", "strengths": ["strength 1", "strength 2", "strength 3"], "improvements": ["improvement 1", "improvement 2", "improvement 3"], "confidenceTips": ["tip 1", "tip 2", "tip 3"]}
 
-Rules:
-- score: number 1-10
-- feedback: string under 500 characters
-- strengths: array of 3 strings
-- improvements: array of 3 strings
-- confidenceTips: array of 3 strings
-
-NO markdown, NO code blocks, NO extra text. Just the JSON object.`;
+      Rules:
+      - score: number 1-10
+      - feedback: string under 500 characters
+      - strengths: array of 3 strings
+      - improvements: array of 3 strings
+      - confidenceTips: array of 3 strings
+      NO markdown, NO code blocks, NO extra text. Just the JSON object.`;
     
     console.log('🤖 Evaluating answer with Gemini...');
     
@@ -169,7 +168,7 @@ NO markdown, NO code blocks, NO extra text. Just the JSON object.`;
       return generateFallbackEvaluation();
     }
     
-    console.log('📝 Raw evaluation (first 400 chars):', text.substring(0, 400));
+    console.log('📝 Raw evaluation:', text);
     
     // Aggressive cleaning
     text = text.trim();
@@ -189,7 +188,7 @@ NO markdown, NO code blocks, NO extra text. Just the JSON object.`;
     // Remove extra spaces
     text = text.replace(/\s+/g, ' ');
     
-    console.log('🧼 After basic cleaning:', text.substring(0, 100));
+      console.log('🧼 After cleaning:', text);
     
     // Extract JSON object
     const startIdx = text.indexOf('{');
