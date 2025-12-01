@@ -361,221 +361,234 @@ const textareaRef = useRef<HTMLTextAreaElement>(null);
   const currentQuestion = questions[currentIndex];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 py-8">
-      {/* ✅ Face Tracking Component */}
-      <SimpleFaceTracker isInterviewActive={!isSubmitting && questions.length > 0} />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 py-4 sm:py-6 lg:py-8">
+  {/* Face Tracking Component */}
+  <SimpleFaceTracker isInterviewActive={!isSubmitting && questions.length > 0} />
 
-      <div className="max-w-4xl mx-auto px-4">
-        {/* Header with Timer */}
-        <div className="mb-6 flex justify-between items-center">
-          <h1 className="text-2xl font-bold flex items-center text-gray-900 dark:text-white">
-            <Sparkles className="w-6 h-6 mr-2 text-blue-600 dark:text-blue-400" />
-            Interview in Progress
-          </h1>
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400 bg-white dark:bg-slate-800 px-4 py-2 rounded-full shadow-md border-2 dark:border-slate-700">
-              <Clock className="w-5 h-5" />
-              <span className="font-mono text-lg font-bold">{formatTime(timeSpent)}</span>
-            </div>
-          </div>
+  <div className="max-w-4xl mx-auto px-4 sm:px-6">
+    {/* Header with Timer - Mobile Optimized */}
+    <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
+      <h1 className="text-xl sm:text-2xl font-bold flex items-center text-gray-900 dark:text-white">
+        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mr-2 flex-shrink-0">
+          <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
         </div>
-
-        {/* Progress */}
-        <div className="mb-6">
-          <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-2">
-            <span className="font-semibold">Question {currentIndex + 1} of {questions.length}</span>
-            <span className="font-semibold">{Math.round(((currentIndex + 1) / questions.length) * 100)}% Complete</span>
-          </div>
-          <div className="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-3 overflow-hidden">
-            <div
-              className="h-3 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full transition-all duration-500 relative overflow-hidden"
-              style={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30 animate-pulse"></div>
-            </div>
-          </div>
+        Interview in Progress
+      </h1>
+      <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto justify-between sm:justify-end">
+        <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400 bg-white dark:bg-slate-800 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full shadow-md border-2 dark:border-slate-700">
+          <Clock className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+          <span className="font-mono text-base sm:text-lg font-bold">{formatTime(timeSpent)}</span>
         </div>
-
-        {/* Error */}
-        {error && (
-          <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-lg">
-            <p className="text-red-600 dark:text-red-400 flex items-center">
-              <AlertCircle className="w-5 h-5 mr-2" />
-              {error}
-            </p>
-          </div>
-        )}
-
-        {/* Question Card */}
-        <Card className="mb-6 shadow-2xl border-2 border-blue-200 dark:border-blue-800 bg-white dark:bg-slate-800">
-          <CardContent className="p-6">
-            <div className="mb-4">
-              <div className="flex justify-between items-start mb-3">
-                <div className="flex items-center space-x-2">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-lg">
-                    {currentIndex + 1}
-                  </div>
-                  <h2 className="text-xl font-bold text-gray-900 dark:text-white">Question {currentIndex + 1}</h2>
-                </div>
-                {submittedAnswers.has(currentQuestion.id) && (
-                  <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-sm font-semibold flex items-center shadow-md">
-                    <CheckCircle className="w-4 h-4 mr-1" />
-                    Submitted
-                  </span>
-                )}
-              </div>
-              <p className="text-lg text-gray-800 dark:text-gray-200 leading-relaxed bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border-l-4 border-blue-600 dark:border-blue-400">
-                {currentQuestion.question}
-              </p>
-            </div>
-
-            {/* Input Mode Toggle */}
-            <div className="mb-4 flex items-center justify-between bg-gray-50 dark:bg-slate-900 p-3 rounded-lg border-2 border-gray-200 dark:border-slate-700">
-              <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Input Mode:</span>
-              <div className="flex space-x-2">
-                <button
-                  onClick={switchToTextMode}
-                  disabled={isSubmitting}
-                  className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all flex items-center ${
-                    inputMode === 'text'
-                      ? 'bg-blue-600 text-white shadow-md'
-                      : 'bg-white dark:bg-slate-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700'
-                  }`}
-                >
-                  <Keyboard className="w-4 h-4 mr-2" />
-                  Text
-                </button>
-                <button
-                  onClick={() => {
-                    setInputMode('voice');
-                    toast.info('Click "Start Recording" to use voice');
-                  }}
-                  disabled={isSubmitting}
-                  className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all flex items-center ${
-                    inputMode === 'voice'
-                      ? 'bg-purple-600 text-white shadow-md'
-                      : 'bg-white dark:bg-slate-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700'
-                  }`}
-                >
-                  <Volume2 className="w-4 h-4 mr-2" />
-                  Voice
-                </button>
-              </div>
-            </div>
-
-            {/* Answer Textarea */}
-            <Textarea
-              ref={textareaRef}
-              value={currentAnswer}
-              onChange={(e) => setCurrentAnswer(e.target.value)}
-              placeholder={inputMode === 'voice' 
-                ? "Click 'Start Recording' to speak your answer, or type here to edit..." 
-                : "Type your answer here..."}
-              className="min-h-[200px] mb-4 text-base border-2 focus:border-blue-500 dark:border-slate-600 dark:bg-slate-900 dark:text-white"
-              disabled={isSubmitting}
-            />
-
-            {/* Character count */}
-            <div className="flex justify-between items-center mb-4">
-              <span className="text-sm text-gray-500 dark:text-gray-400">
-                {currentAnswer.length} characters
-              </span>
-              {inputMode === 'voice' && !isRecording && currentAnswer && (
-                <span className="text-sm text-blue-600 dark:text-blue-400 font-semibold flex items-center">
-                  <Keyboard className="w-4 h-4 mr-1" />
-                  You can edit the text above
-                </span>
-              )}
-            </div>
-
-            {/* Recording Controls */}
-            <div className="flex justify-between items-center">
-              <Button
-                onClick={toggleRecording}
-                variant={isRecording ? 'destructive' : 'outline'}
-                disabled={isSubmitting}
-                className="min-w-[150px] dark:border-slate-600"
-              >
-                {isRecording ? (
-                  <>
-                    <MicOff className="w-4 h-4 mr-2 animate-pulse" />
-                    Stop Recording
-                  </>
-                ) : (
-                  <>
-                    <Mic className="w-4 h-4 mr-2" />
-                    Start Recording
-                  </>
-                )}
-              </Button>
-
-              <Button
-                onClick={handleSubmitAnswer}
-                disabled={isSubmitting || !currentAnswer.trim()}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 min-w-[180px] shadow-lg"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Submitting...
-                  </>
-                ) : currentIndex === questions.length - 1 ? (
-                  <>
-                    <Send className="w-4 h-4 mr-2" />
-                    Submit & Finish
-                  </>
-                ) : (
-                  <>
-                    <Send className="w-4 h-4 mr-2" />
-                    Submit Answer
-                  </>
-                )}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Navigation */}
-        <div className="flex justify-between mb-6">
-          <Button
-            onClick={goToPrevious}
-            disabled={currentIndex === 0 || isSubmitting}
-            variant="outline"
-            className="min-w-[120px] border-2 dark:border-slate-600 dark:text-gray-300"
-          >
-            <ChevronLeft className="w-4 h-4 mr-2" />
-            Previous
-          </Button>
-
-          <Button
-            onClick={goToNext}
-            disabled={currentIndex === questions.length - 1 || isSubmitting}
-            variant="outline"
-            className="min-w-[120px] border-2 dark:border-slate-600 dark:text-gray-300"
-          >
-            Next
-            <ChevronRight className="w-4 h-4 ml-2" />
-          </Button>
-        </div>
-
-        {/* Instructions */}
-        <Card className="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800">
-          <CardContent className="p-4">
-            <h3 className="font-semibold text-blue-900 dark:text-blue-300 mb-2 flex items-center">
-              <Sparkles className="w-5 h-5 mr-2" />
-              💡 Tips:
-            </h3>
-            <div className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
-              <p>• You can navigate between questions using Previous/Next buttons</p>
-              <p>• <strong>Use voice recording OR type your answer</strong> - both work!</p>
-              <p>• <strong>Voice mode:</strong> Click record, speak, then edit the text if needed</p>
-              <p>• <strong>Eye tracking:</strong> Monitor in top-right corner shows your eye contact</p>
-              <p>• Submit each answer to get instant AI feedback</p>
-              <p>• Take your time - there's no time limit!</p>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
+
+    {/* Progress - Enhanced */}
+    <div className="mb-4 sm:mb-6">
+      <div className="flex justify-between text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-2">
+        <span className="font-semibold">Question {currentIndex + 1} of {questions.length}</span>
+        <span className="font-semibold">{Math.round(((currentIndex + 1) / questions.length) * 100)}% Complete</span>
+      </div>
+      <div className="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-2 sm:h-3 overflow-hidden shadow-inner">
+        <div
+          className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full transition-all duration-500 relative overflow-hidden"
+          style={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30 animate-pulse"></div>
+        </div>
+      </div>
+    </div>
+
+    {/* Error - Mobile Optimized */}
+    {error && (
+      <div className="mb-3 sm:mb-4 p-3 sm:p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-lg">
+        <p className="text-sm sm:text-base text-red-600 dark:text-red-400 flex items-start">
+          <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0 mt-0.5" />
+          <span>{error}</span>
+        </p>
+      </div>
+    )}
+
+    {/* Question Card - Enhanced */}
+    <Card className="mb-4 sm:mb-6 shadow-2xl border-2 border-blue-200 dark:border-blue-800 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm">
+      <CardContent className="p-3 sm:p-4 lg:p-6">
+        <div className="mb-3 sm:mb-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start gap-2 sm:gap-0 mb-3">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-600 to-purple-600 text-white rounded-full flex items-center justify-center font-bold text-base sm:text-lg shadow-lg flex-shrink-0">
+                {currentIndex + 1}
+              </div>
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Question {currentIndex + 1}</h2>
+            </div>
+            {submittedAnswers.has(currentQuestion.id) && (
+              <span className="px-2.5 py-1 sm:px-3 sm:py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-xs sm:text-sm font-semibold flex items-center shadow-md">
+                <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                Submitted
+              </span>
+            )}
+          </div>
+          <p className="text-sm sm:text-base lg:text-lg text-gray-800 dark:text-gray-200 leading-relaxed bg-blue-50 dark:bg-blue-900/20 p-3 sm:p-4 rounded-lg border-l-4 border-blue-600 dark:border-blue-400">
+            {currentQuestion.question}
+          </p>
+        </div>
+
+        {/* Input Mode Toggle - Mobile Stack */}
+        <div className="mb-3 sm:mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between bg-gray-50 dark:bg-slate-900 p-2.5 sm:p-3 rounded-lg border-2 border-gray-200 dark:border-slate-700 gap-2 sm:gap-0">
+          <span className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300">Input Mode:</span>
+          <div className="flex space-x-2 w-full sm:w-auto">
+            <button
+              onClick={switchToTextMode}
+              disabled={isSubmitting}
+              className={`flex-1 sm:flex-none px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg font-semibold text-xs sm:text-sm transition-all flex items-center justify-center ${
+                inputMode === 'text'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'bg-white dark:bg-slate-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700'
+              }`}
+            >
+              <Keyboard className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+              Text
+            </button>
+            <button
+              onClick={() => {
+                setInputMode('voice');
+                toast.info('Click "Start Recording" to use voice');
+              }}
+              disabled={isSubmitting}
+              className={`flex-1 sm:flex-none px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg font-semibold text-xs sm:text-sm transition-all flex items-center justify-center ${
+                inputMode === 'voice'
+                  ? 'bg-purple-600 text-white shadow-md'
+                  : 'bg-white dark:bg-slate-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700'
+              }`}
+            >
+              <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+              Voice
+            </button>
+          </div>
+        </div>
+
+        {/* Answer Textarea - Enhanced */}
+        <div className="relative">
+          <Textarea
+            ref={textareaRef}
+            value={currentAnswer}
+            onChange={(e) => setCurrentAnswer(e.target.value)}
+            placeholder={inputMode === 'voice' 
+              ? "Click 'Start Recording' to speak your answer, or type here to edit..." 
+              : "Type your answer here..."}
+            className="min-h-[150px] sm:min-h-[200px] mb-3 sm:mb-4 text-sm sm:text-base border-2 focus:border-blue-500 dark:border-slate-600 dark:bg-slate-900 dark:text-white resize-none"
+            disabled={isSubmitting}
+          />
+          {/* Recording indicator */}
+          {isRecording && (
+            <div className="absolute top-2 right-2 flex items-center space-x-1.5 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold animate-pulse">
+              <div className="w-2 h-2 bg-white rounded-full animate-ping"></div>
+              <span>Recording</span>
+            </div>
+          )}
+        </div>
+
+        {/* Character count - Mobile Optimized */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 sm:mb-4 gap-1 sm:gap-0">
+          <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+            {currentAnswer.length} characters
+          </span>
+          {inputMode === 'voice' && !isRecording && currentAnswer && (
+            <span className="text-xs sm:text-sm text-blue-600 dark:text-blue-400 font-semibold flex items-center">
+              <Keyboard className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+              You can edit the text above
+            </span>
+          )}
+        </div>
+
+        {/* Recording Controls - Mobile Stack */}
+        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2 sm:gap-4">
+          <Button
+            onClick={toggleRecording}
+            variant={isRecording ? 'destructive' : 'outline'}
+            disabled={isSubmitting}
+            className="w-full sm:w-auto sm:min-w-[150px] dark:border-slate-600 text-sm sm:text-base py-4 sm:py-2"
+          >
+            {isRecording ? (
+              <>
+                <MicOff className="w-4 h-4 mr-2 animate-pulse" />
+                Stop Recording
+              </>
+            ) : (
+              <>
+                <Mic className="w-4 h-4 mr-2" />
+                Start Recording
+              </>
+            )}
+          </Button>
+
+          <Button
+            onClick={handleSubmitAnswer}
+            disabled={isSubmitting || !currentAnswer.trim()}
+            className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 sm:min-w-[180px] shadow-lg text-sm sm:text-base py-4 sm:py-2"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Submitting...
+              </>
+            ) : currentIndex === questions.length - 1 ? (
+              <>
+                <Send className="w-4 h-4 mr-2" />
+                Submit & Finish
+              </>
+            ) : (
+              <>
+                <Send className="w-4 h-4 mr-2" />
+                Submit Answer
+              </>
+            )}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+
+    {/* Navigation - Mobile Full Width */}
+    <div className="flex flex-col sm:flex-row justify-between mb-4 sm:mb-6 gap-2 sm:gap-0">
+      <Button
+        onClick={goToPrevious}
+        disabled={currentIndex === 0 || isSubmitting}
+        variant="outline"
+        className="w-full sm:w-auto sm:min-w-[120px] border-2 dark:border-slate-600 dark:text-gray-300 text-sm sm:text-base py-4 sm:py-2"
+      >
+        <ChevronLeft className="w-4 h-4 mr-2" />
+        Previous
+      </Button>
+
+      <Button
+        onClick={goToNext}
+        disabled={currentIndex === questions.length - 1 || isSubmitting}
+        variant="outline"
+        className="w-full sm:w-auto sm:min-w-[120px] border-2 dark:border-slate-600 dark:text-gray-300 text-sm sm:text-base py-4 sm:py-2"
+      >
+        Next
+        <ChevronRight className="w-4 h-4 ml-2" />
+      </Button>
+    </div>
+
+    {/* Instructions - Enhanced Card */}
+    <Card className="bg-blue-50/80 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800 backdrop-blur-sm">
+      <CardContent className="p-3 sm:p-4">
+        <h3 className="font-semibold text-sm sm:text-base text-blue-900 dark:text-blue-300 mb-2 flex items-center">
+          <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mr-2 flex-shrink-0">
+            <Sparkles className="w-3.5 h-3.5 text-white" />
+          </div>
+          💡 Tips:
+        </h3>
+        <div className="text-xs sm:text-sm text-blue-800 dark:text-blue-200 space-y-1">
+          <p>• Navigate between questions using Previous/Next buttons</p>
+          <p>• <strong>Use voice recording OR type</strong> - both work!</p>
+          <p>• <strong>Voice mode:</strong> Click record, speak, then edit if needed</p>
+          <p>• <strong>Eye tracking:</strong> Monitor shows your eye contact</p>
+          <p>• Submit each answer to get instant AI feedback</p>
+          <p>• Take your time - there's no time limit!</p>
+        </div>
+      </CardContent>
+    </Card>
+  </div>
+</div>
   );
 }

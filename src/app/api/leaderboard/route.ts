@@ -107,13 +107,10 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ leaderboard });
 
-  } catch (error: any) {
-    console.error('❌ Leaderboard error:', error);
+  } catch (error) {
+    console.error('❌ Error fetching leaderboard:', error);
     return NextResponse.json(
-      { 
-        error: 'Failed to fetch leaderboard',
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined
-      },
+      { error: 'Error fetching leaderboard' },
       { status: 500 }
     );
   }

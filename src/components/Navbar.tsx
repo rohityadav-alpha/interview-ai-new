@@ -1,15 +1,16 @@
 // src/components/Navbar.tsx
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
 import { useCustomAuth } from '@/hooks/useCustomAuth';
 import { Button } from '@/components/ui/button';
-import { 
-  Brain, 
-  Menu, 
-  X, 
-  Trophy, 
-  LogOut, 
+import {
+  Brain,
+  Menu,
+  X,
+  Trophy,
+  LogOut,
   Home,
   Zap,
   ChevronDown,
@@ -26,13 +27,12 @@ export default function Navbar() {
   const { signOut } = useClerk();
   const router = useRouter();
   const pathname = usePathname();
-  
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [mounted, setMounted] = useState(false);
-  
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   // Initialize theme
@@ -77,6 +77,7 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Close mobile menu on route change
   useEffect(() => {
     setIsMenuOpen(false);
   }, [pathname]);
@@ -95,80 +96,79 @@ export default function Navbar() {
   ];
 
   if (!mounted) {
-    return <div className="h-16" />;
+    return <nav className="h-16 bg-white dark:bg-slate-950 border-b border-gray-200 dark:border-slate-800" />;
   }
 
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        className={`sticky top-0 left-0 right-0 z-50 transition-all duration-300 ${
           scrolled
-            ? 'bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-lg'
-            : 'bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm'
-        }`}
+            ? 'bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg shadow-lg'
+            : 'bg-white dark:bg-slate-950'
+        } border-b border-gray-200 dark:border-slate-800`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo */}
-            <Link href={isSignedIn ? '/dashboard' : '/'} className="flex items-center space-x-2 group">
-              <div className="relative">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all group-hover:scale-110">
-                  <Brain className="w-6 h-6 text-white" />
-                </div>
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white dark:border-slate-900"></div>
+          <div className="flex items-center justify-between h-16">
+            {/* Logo - Mobile Optimized */}
+            <Link
+              href="/"
+              className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+            >
+              <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-1.5 sm:p-2 rounded-lg">
+                <Brain className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
                 Interview AI
               </span>
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-1">
+            <div className="hidden md:flex items-center space-x-1 lg:space-x-2">
               {isSignedIn ? (
                 <>
                   {navLinks.map((link) => (
-                    <Link key={link.href} href={link.href}>
-                      <Button
-                        variant="ghost"
-                        className={`flex items-center space-x-2 transition-all ${
-                          isActivePath(link.href)
-                            ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-semibold'
-                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800'
-                        }`}
-                      >
-                        <link.icon className="w-4 h-4" />
-                        <span>{link.label}</span>
-                      </Button>
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className={`flex items-center space-x-2 px-3 lg:px-4 py-2 rounded-lg transition-all ${
+                        isActivePath(link.href)
+                          ? 'bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400'
+                          : 'hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-700 dark:text-gray-300'
+                      }`}
+                    >
+                      <link.icon className="w-4 h-4" />
+                      <span className="font-medium text-sm lg:text-base">{link.label}</span>
                     </Link>
                   ))}
 
                   {/* Theme Toggle Button */}
                   <button
                     onClick={toggleTheme}
-                    className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors ml-2"
+                    className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
                     aria-label="Toggle theme"
                   >
                     {theme === 'light' ? (
                       <Moon className="w-5 h-5 text-gray-700 dark:text-gray-300" />
                     ) : (
-                      <Sun className="w-5 h-5 text-yellow-500" />
+                      <Sun className="w-5 h-5 text-gray-700 dark:text-gray-300" />
                     )}
                   </button>
 
                   {/* User Dropdown */}
-                  <div className="relative ml-2" ref={userMenuRef}>
+                  <div className="relative" ref={userMenuRef}>
                     <button
                       onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                      className="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-all"
+                      className="flex items-center space-x-2 px-3 lg:px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-all"
                     >
-                      <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold shadow-md">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
                         {userName?.[0]?.toUpperCase() || 'U'}
                       </div>
-                      <span className="font-semibold text-gray-700 dark:text-gray-300 max-w-[100px] truncate">
+                      <span className="hidden lg:block font-medium text-gray-900 dark:text-white text-sm">
                         {userName}
                       </span>
                       <ChevronDown
-                        className={`w-4 h-4 text-gray-600 dark:text-gray-400 transition-transform ${
+                        className={`w-4 h-4 text-gray-500 transition-transform ${
                           isUserMenuOpen ? 'rotate-180' : ''
                         }`}
                       />
@@ -176,37 +176,36 @@ export default function Navbar() {
 
                     {/* Dropdown Menu */}
                     {isUserMenuOpen && (
-                      <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border-2 border-gray-100 dark:border-slate-700 py-2 animate-slideDown">
-                        <div className="px-4 py-3 border-b border-gray-100 dark:border-slate-700">
+                      <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-gray-200 dark:border-slate-800 py-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                        <div className="px-4 py-3 border-b border-gray-200 dark:border-slate-800">
                           <div className="flex items-center space-x-3">
-                            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">
                               {userName?.[0]?.toUpperCase() || 'U'}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="font-bold text-gray-900 dark:text-gray-100 truncate">{userName}</p>
-                              <p className="text-sm text-gray-600 dark:text-gray-400 truncate">{userEmail}</p>
+                              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                {userName}
+                              </p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                {userEmail}
+                              </p>
                             </div>
                           </div>
                         </div>
-
-                        <div className="py-2">
-                          <Link href="/dashboard">
-                            <button className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-slate-700 flex items-center transition-colors">
-                              <Home className="w-4 h-4 mr-3 text-blue-600 dark:text-blue-400" />
-                              Dashboard
-                            </button>
-                          </Link>
-                        </div>
-
-                        <div className="border-t border-gray-100 dark:border-slate-700 pt-2">
-                          <button
-                            onClick={handleSignOut}
-                            className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center transition-colors"
-                          >
-                            <LogOut className="w-4 h-4 mr-3" />
-                            Sign Out
-                          </button>
-                        </div>
+                        <Link
+                          href="/dashboard"
+                          className="flex items-center space-x-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
+                        >
+                          <Home className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                          <span className="text-sm text-gray-700 dark:text-gray-300">Dashboard</span>
+                        </Link>
+                        <button
+                          onClick={handleSignOut}
+                          className="w-full flex items-center space-x-2 px-4 py-2 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors text-red-600 dark:text-red-400"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          <span className="text-sm font-medium">Sign Out</span>
+                        </button>
                       </div>
                     )}
                   </div>
@@ -215,26 +214,28 @@ export default function Navbar() {
                 <>
                   <button
                     onClick={toggleTheme}
-                    className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors mr-2"
+                    className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+                    aria-label="Toggle theme"
                   >
                     {theme === 'light' ? (
                       <Moon className="w-5 h-5 text-gray-700 dark:text-gray-300" />
                     ) : (
-                      <Sun className="w-5 h-5 text-yellow-500" />
+                      <Sun className="w-5 h-5 text-gray-700 dark:text-gray-300" />
                     )}
                   </button>
-                  
-                  <Link href="/sign-in">
-                    <Button variant="ghost" className="text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800">
-                      Sign In
-                    </Button>
-                  </Link>
-                  <Link href="/sign-up">
-                    <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg">
-                      <Sparkles className="w-4 h-4 mr-2" />
-                      Get Started
-                    </Button>
-                  </Link>
+                  <Button
+                    variant="ghost"
+                    onClick={() => router.push('/sign-in')}
+                    className="text-sm lg:text-base"
+                  >
+                    Sign In
+                  </Button>
+                  <Button
+                    onClick={() => router.push('/sign-up')}
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-sm lg:text-base"
+                  >
+                    Get Started
+                  </Button>
                 </>
               )}
             </div>
@@ -243,6 +244,7 @@ export default function Navbar() {
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+              aria-label="Toggle menu"
             >
               {isMenuOpen ? (
                 <X className="w-6 h-6 text-gray-700 dark:text-gray-300" />
@@ -253,77 +255,93 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu - Enhanced */}
         {isMenuOpen && (
-          <div className="md:hidden bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-800 shadow-lg animate-slideDown">
-            <div className="px-4 py-4 space-y-2">
+          <div className="md:hidden border-t border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950 animate-in slide-in-from-top duration-200">
+            <div className="px-4 py-4 space-y-3 max-h-[calc(100vh-4rem)] overflow-y-auto">
+              {/* Theme Toggle - Mobile */}
               <button
                 onClick={toggleTheme}
-                className="w-full flex items-center justify-between px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+                className="w-full flex items-center justify-between px-4 py-3 rounded-lg bg-gray-50 dark:bg-slate-900 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
               >
-                <span className="flex items-center space-x-3 text-gray-700 dark:text-gray-300">
-                  {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5 text-yellow-500" />}
-                  <span>Theme</span>
-                </span>
+                <div className="flex items-center space-x-3">
+                  {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+                  <span className="font-medium">Theme</span>
+                </div>
                 <span className="text-sm text-gray-500 dark:text-gray-400 capitalize">{theme}</span>
               </button>
 
               {isSignedIn ? (
                 <>
-                  <div className="flex items-center space-x-3 px-4 py-3 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                      {userName?.[0]?.toUpperCase() || 'U'}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold text-gray-900 dark:text-gray-100 truncate">{userName}</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 truncate">{userEmail}</p>
+                  {/* User Info - Mobile */}
+                  <div className="px-4 py-3 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+                        {userName?.[0]?.toUpperCase() || 'U'}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                          {userName}
+                        </p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                          {userEmail}
+                        </p>
+                      </div>
                     </div>
                   </div>
 
-                  {navLinks.map((link) => (
-                    <Link key={link.href} href={link.href}>
-                      <button
-                        className={`w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3 transition-all ${
+                  {/* Nav Links - Mobile */}
+                  <div className="space-y-1">
+                    {navLinks.map((link) => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${
                           isActivePath(link.href)
-                            ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-semibold'
-                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800'
+                            ? 'bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400'
+                            : 'hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-700 dark:text-gray-300'
                         }`}
                       >
-                        <link.icon className="w-5 h-5" />
-                        <span>{link.label}</span>
-                      </button>
-                    </Link>
-                  ))}
+                        <link.icon className="w-5 h-5 flex-shrink-0" />
+                        <span className="font-medium">{link.label}</span>
+                      </Link>
+                    ))}
+                  </div>
 
+                  {/* Sign Out - Mobile */}
                   <button
                     onClick={handleSignOut}
-                    className="w-full text-left px-4 py-3 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg flex items-center space-x-3 transition-colors mt-2"
+                    className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg bg-red-50 dark:bg-red-950/20 hover:bg-red-100 dark:hover:bg-red-950/30 text-red-600 dark:text-red-400 transition-colors"
                   >
-                    <LogOut className="w-5 h-5" />
-                    <span>Sign Out</span>
+                    <LogOut className="w-5 h-5 flex-shrink-0" />
+                    <span className="font-medium">Sign Out</span>
                   </button>
                 </>
               ) : (
-                <>
-                  <Link href="/sign-in">
-                    <Button variant="outline" className="w-full mb-2 dark:border-slate-700 dark:text-gray-300">
-                      Sign In
-                    </Button>
-                  </Link>
-                  <Link href="/sign-up">
-                    <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600">
-                      <Sparkles className="w-4 h-4 mr-2" />
-                      Get Started
-                    </Button>
-                  </Link>
-                </>
+                <div className="space-y-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => router.push('/sign-in')}
+                    className="w-full justify-center py-6 text-base"
+                  >
+                    Sign In
+                  </Button>
+                  <Button
+                    onClick={() => router.push('/sign-up')}
+                    className="w-full justify-center py-6 text-base bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                  >
+                    <Sparkles className="w-5 h-5 mr-2" />
+                    Get Started
+                  </Button>
+                </div>
               )}
             </div>
           </div>
         )}
       </nav>
 
-      <div className="h-16"></div>
+      {/* Spacer to prevent content from going under fixed navbar */}
+      <div className="h-01" />
     </>
   );
 }

@@ -60,8 +60,6 @@ export function generatePDFReport(data: ReportData): boolean {
     doc.setFontSize(11);
     doc.text(`Name: ${data.userName || 'N/A'}`, 20, yPos);
     yPos += 6;
-    doc.text(`Email: ${data.userEmail || 'N/A'}`, 20, yPos);
-    yPos += 6;
     doc.text(`Date: ${new Date(data.createdAt).toLocaleDateString('en-US', { 
       year: 'numeric', month: 'long', day: 'numeric' 
     })}`, 20, yPos);
