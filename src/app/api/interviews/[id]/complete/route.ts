@@ -52,7 +52,7 @@ export async function POST(
 
       if (userEmail && process.env.SENDGRID_API_KEY) {
         const baseUrl =
-          process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+          process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000' || 'https://interview-ai-new-three.vercel.app';
         const reportUrl = `${baseUrl}/reports/${interviewId}`;
         const userName = user?.firstName || 'User';
 
