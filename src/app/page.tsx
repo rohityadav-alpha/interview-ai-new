@@ -1,241 +1,280 @@
-// src/app/page.tsx
-
+// src/app/page.tsx  — Skeuomorphic landing page using shadcn Button + Card components.
 'use client';
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useCustomAuth } from '@/hooks/useCustomAuth';
-import { Button } from '@/components/ui/button';
 import Footer from '@/components/Footer';
-import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import {
-  Brain,
-  Zap,
-  Award,
-  TrendingUp,
-  Users,
-  CheckCircle,
-  Sparkles,
-  Target,
-  Clock,
-  ArrowRight,
+  Brain, Zap, Award, TrendingUp, Users, Clock, ArrowRight, Sparkles, Trophy,
 } from 'lucide-react';
+
+function Led({ color = 'green', blink }: { color?: 'green' | 'amber' | 'red'; blink?: boolean }) {
+  return <span className={`sku-led sku-led-${color}${blink ? ' sku-led-blink' : ''}`} aria-hidden="true" style={{ display: 'inline-block' }} />;
+}
+function Meter({ value }: { value: number }) {
+  return (
+    <div className="sku-meter-track" aria-hidden="true">
+      <div className="sku-meter-fill" style={{ width: `${Math.max(2, value)}%` }} />
+    </div>
+  );
+}
+
+function FeatureCard({ icon: Icon, title, description, meterValue }: {
+  icon: React.ElementType; title: string; description: string; meterValue: number;
+}) {
+  return (
+    <Card>
+      <CardHeader>
+        <Led color="green" />
+        <span className="sku-label">{title}</span>
+        <div style={{ marginLeft: 'auto' }}>
+          <span className="sku-screw" style={{ width: 10, height: 10 }} aria-hidden="true" />
+        </div>
+      </CardHeader>
+      <CardContent style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        <div className="sku-knob" style={{ width: 52, height: 52 }} aria-hidden="true">
+          <Icon size={20} color="var(--sku-amber-hi)" />
+        </div>
+        <p style={{ fontFamily: 'Roboto Condensed, sans-serif', fontSize: '0.82rem', color: 'var(--sku-metal-mid)', lineHeight: 1.55 }}>
+          {description}
+        </p>
+        <div>
+          <span className="sku-label" style={{ display: 'block', marginBottom: 4 }}>Activity</span>
+          <Meter value={meterValue} />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function LandingPage() {
   const { isSignedIn, isLoading } = useCustomAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && isSignedIn) {
-      router.push('/dashboard');
-    }
+    if (!isLoading && isSignedIn) router.push('/dashboard');
   }, [isLoading, isSignedIn, router]);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
-        <div className="text-center space-y-4 px-4">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
-          <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">Loading Interview AI...</p>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#1a1a1a' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div className="sku-spinner" style={{ margin: '0 auto 1rem' }} />
+          <p className="sku-label">Initializing System…</p>
         </div>
       </div>
     );
   }
 
   const features = [
-    {
-      icon: Brain,
-      title: 'AI-Powered Feedback',
-      description: 'Get instant, detailed feedback on your answers with actionable improvement tips',
-    },
-    {
-      icon: Target,
-      title: 'Real Interview Questions',
-      description: 'Practice with questions from top tech companies and various difficulty levels',
-    },
-    {
-      icon: TrendingUp,
-      title: 'Track Your Progress',
-      description: 'Monitor your improvement over time with detailed analytics and reports',
-    },
-    {
-      icon: Award,
-      title: 'Compete & Learn',
-      description: 'Join the leaderboard and see how you rank against other candidates',
-    },
+    { icon: Brain, title: 'AI Feedback Engine', description: 'Instant, detailed AI-powered feedback on every answer with actionable improvement signals.', meter: 94 },
+    { icon: Trophy, title: 'Real Interview Qs', description: 'Questions sourced from top tech companies across multiple difficulty levels.', meter: 87 },
+    { icon: TrendingUp, title: 'Progress Analytics', description: 'Monitor your performance over time with detailed charts and session reports.', meter: 76 },
+    { icon: Award, title: 'Global Leaderboard', description: 'Compete with thousands of candidates and climb the worldwide ranking board.', meter: 81 },
   ];
 
-  const benefits = [
+  const stats = [
+    { label: 'Developers Trained', value: '1,000+', led: 'green' as const },
+    { label: 'Questions in Bank', value: '500+', led: 'amber' as const },
+    { label: 'Avg. Score Gain', value: '+34%', led: 'green' as const },
+    { label: 'Completion Rate', value: '92%', led: 'amber' as const },
+  ];
+
+  const checklist = [
     { icon: Zap, text: 'Instant AI-powered feedback' },
     { icon: Clock, text: 'Practice anytime, anywhere' },
-    { icon: TrendingUp, text: 'Track your improvement' },
-    { icon: Users, text: 'Join a community of learners' },
+    { icon: TrendingUp, text: 'Track improvement over time' },
+    { icon: Users, text: 'Join an active dev community' },
+    { icon: Award, text: 'No credit card required' },
+    { icon: Brain, text: 'Certificate of completion' },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
-      {/* Hero Section - Mobile Optimized */}
-      <section className="relative pt-20 sm:pt-24 lg:pt-32 pb-16 sm:pb-20 lg:pb-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        {/* Background Effects */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500/10 dark:bg-blue-500/5 rounded-full blur-3xl"></div>
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500/10 dark:bg-purple-500/5 rounded-full blur-3xl"></div>
-        </div>
+    <div style={{ minHeight: '100vh', background: '#1a1a1a' }}>
 
-        <div className="max-w-7xl mx-auto relative">
-          <div className="text-center space-y-6 sm:space-y-8">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 text-xs sm:text-sm font-medium">
-              <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
-              AI-Powered Interview Practice
+      {/* ── HERO ─────────────────────────────────────────────── */}
+      <section style={{ paddingTop: '5rem', paddingBottom: '4rem', paddingLeft: '1.5rem', paddingRight: '1.5rem', position: 'relative', overflow: 'hidden' }}>
+        {/* Brushed texture bg */}
+        <div aria-hidden="true" style={{
+          position: 'absolute', inset: 0,
+          background: 'repeating-linear-gradient(90deg,rgba(255,255,255,0.012) 0px,rgba(255,255,255,0.012) 1px,transparent 1px,transparent 5px)',
+          pointerEvents: 'none',
+        }} />
+        {/* Radial vignette */}
+        <div aria-hidden="true" style={{
+          position: 'absolute', inset: 0,
+          background: 'radial-gradient(ellipse at 50% 0%, rgba(212,130,10,0.04) 0%, transparent 70%)',
+          pointerEvents: 'none',
+        }} />
+
+        <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem', textAlign: 'center', position: 'relative' }}>
+
+          {/* Status badge */}
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            padding: '0.35rem 0.9rem', borderRadius: 4,
+            background: '#0a1f0a', border: '1px solid #1a5a1a',
+            boxShadow: 'inset 0 0 10px rgba(0,255,65,0.08)',
+          }}>
+            <Led color="green" blink />
+            <span style={{ fontFamily: 'Oswald, sans-serif', fontSize: '0.68rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#00ff41', textShadow: '0 0 8px rgba(0,255,65,0.8)' }}>
+              System Online — AI Feedback Active
+            </span>
+          </div>
+
+          {/* Headline */}
+          <h1 className="sku-heading" style={{ fontSize: 'clamp(2.2rem,6vw,4rem)', lineHeight: 1.1, letterSpacing: '0.04em' }}>
+            Master Your Next<br />
+            <span style={{ color: 'var(--sku-amber-hi)', textShadow: '0 0 12px var(--sku-amber-glow),1px 1px 0 rgba(0,0,0,0.8),-1px -1px 0 rgba(255,255,255,0.05)' }}>
+              Technical Interview
+            </span>
+          </h1>
+
+          {/* Sub */}
+          <p style={{ fontFamily: 'Roboto Condensed, sans-serif', fontSize: '1rem', color: 'var(--sku-metal-mid)', lineHeight: 1.6, maxWidth: 540, margin: '0 auto' }}>
+            Practice with real interview questions, receive instant AI feedback, and track
+            your improvement on a production-grade platform built for serious developers.
+          </p>
+
+          {/* LCD readout */}
+          <div className="sku-lcd" style={{ maxWidth: 520, width: '100%', margin: '0 auto', position: 'relative', padding: '0.7rem 1.2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <span>&gt; STATUS: READY</span>
+              <span>&gt; USERS: 1,024</span>
+              <span>&gt; AI_VER: 2.4.1</span>
             </div>
+          </div>
 
-            {/* Headline - Mobile Responsive */}
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white leading-tight px-4 sm:px-0">
-              Master Your Next
-              <br />
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
-                Technical Interview
-              </span>
-            </h1>
-
-            {/* Subheadline - Mobile Responsive */}
-            <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed px-4 sm:px-6">
-              Practice with real interview questions, get instant AI feedback, and track your improvement 📈
-            </p>
-
-            {/* CTA Buttons - Mobile Stacked */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-4 px-4 sm:px-0">
-              <Button
-                asChild
-                size="lg"
-                className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all text-sm sm:text-base px-6 sm:px-8 py-5 sm:py-6"
-              >
-                <Link href="/sign-up" className="flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                  Get Started Free
-                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
-                </Link>
+          {/* CTA buttons */}
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link href="/sign-up">
+              <Button id="hero-cta-primary" size="lg">
+                <Sparkles size={15} style={{ marginRight: 8 }} />
+                Get Started Free
+                <ArrowRight size={15} style={{ marginLeft: 8 }} />
               </Button>
-              <Button
-                asChild
-                variant="outline"
-                size="lg"
-                className="w-full sm:w-auto text-sm sm:text-base px-6 sm:px-8 py-5 sm:py-6 border-2"
-              >
-                <Link href="/sign-in">Sign In</Link>
+            </Link>
+            <Link href="/sign-in">
+              <Button id="hero-cta-secondary" variant="secondary" size="lg">
+                Sign In
               </Button>
-            </div>
+            </Link>
+          </div>
 
-            {/* Social Proof - Mobile Responsive */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 pt-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-              <div className="flex items-center gap-1">
-                <Users className="w-4 h-4 text-green-500" />
-                <span>Join 1,000+ developers improving their skills</span>
-              </div>
-            </div>
+          {/* Social proof */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, color: 'var(--sku-metal-dark)', fontFamily: 'Roboto Condensed, sans-serif', fontSize: '0.78rem' }}>
+            <Led color="green" />
+            Join 1,000+ developers already improving their interview skills
           </div>
         </div>
       </section>
 
-      {/* Features Section - Mobile Grid */}
-      <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-white/50 dark:bg-slate-900/50">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-10 sm:mb-12 lg:mb-16 space-y-3 sm:space-y-4">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white px-4">
-              Why Choose Interview AI?
-            </h2>
-            <p className="text-sm sm:text-base lg:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto px-4 sm:px-6">
-              Meets practical interview preparation for the ultimate learning experience
+      {/* ── STATS BAR ─────────────────────────────────────────── */}
+      <div style={{
+        background: 'repeating-linear-gradient(90deg,rgba(255,255,255,0.015) 0px,rgba(255,255,255,0.015) 1px,transparent 1px,transparent 5px),linear-gradient(180deg,#111,#161616)',
+        borderTop: '2px solid #0a0a0a', borderBottom: '2px solid #0a0a0a',
+        padding: '1.5rem',
+      }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: '1px' }}>
+          {stats.map((s, i) => (
+            <div key={i} style={{ padding: '1.25rem 1.5rem', borderRight: i < stats.length - 1 ? '1px solid #222' : 'none', textAlign: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 4 }}>
+                <Led color={s.led} />
+                <span className="sku-label">{s.label}</span>
+              </div>
+              <p className="sku-heading" style={{ fontSize: '2rem', lineHeight: 1, color: 'var(--sku-amber-hi)', textShadow: '0 0 12px var(--sku-amber-glow)' }}>
+                {s.value}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── FEATURES ──────────────────────────────────────────── */}
+      <section style={{ padding: '5rem 1.5rem' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center', marginBottom: '0.75rem' }}>
+              <span className="sku-screw" aria-hidden="true" />
+              <h2 className="sku-heading" style={{ fontSize: 'clamp(1.4rem,3vw,2rem)' }}>System Capabilities</h2>
+              <span className="sku-screw" aria-hidden="true" />
+            </div>
+            <p style={{ fontFamily: 'Roboto Condensed, sans-serif', color: 'var(--sku-metal-dark)', fontSize: '0.88rem', letterSpacing: '0.05em' }}>
+              Enterprise-grade AI modules powering your interview preparation
             </p>
+            <div className="sku-divider" style={{ marginTop: '1.5rem' }} />
           </div>
 
-          {/* Features Grid - Mobile 1 col, Tablet 2 cols, Desktop 4 cols */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-            {features.map((feature, index) => (
-              <Card
-                key={index}
-                className="group hover:shadow-xl transition-all duration-300 border-2 hover:border-blue-200 dark:hover:border-blue-800 bg-white dark:bg-slate-900"
-              >
-                <CardContent className="p-5 sm:p-6 space-y-3 sm:space-y-4">
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <feature.icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
-                  </div>
-                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
-                    {feature.title}
-                  </h3>
-                  <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed">
-                    {feature.description}
-                  </p>
-                </CardContent>
-              </Card>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: '1.5rem' }}>
+            {features.map((f, i) => (
+              <FeatureCard key={i} icon={f.icon} title={f.title} description={f.description} meterValue={f.meter} />
             ))}
           </div>
         </div>
       </section>
 
-      {/* Benefits Section - Mobile List */}
-      <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-12 border border-blue-200 dark:border-blue-800">
-            <div className="text-center mb-8 sm:mb-10 lg:mb-12 space-y-3 sm:space-y-4">
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white">
-                Everything You Need to Succeed
-              </h2>
-              <p className="text-sm sm:text-base lg:text-lg text-gray-600 dark:text-gray-400">
-                All the tools and features to ace your next interview
-              </p>
-            </div>
-
-            {/* Benefits Grid - Mobile 1 col, Desktop 2 cols */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-              {benefits.map((benefit, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-3 sm:gap-4 p-4 sm:p-5 rounded-xl bg-white dark:bg-slate-900 shadow-sm hover:shadow-md transition-shadow"
-                >
-                  <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                    <benefit.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+      {/* ── CHECKLIST ─────────────────────────────────────────── */}
+      <section style={{ padding: '0 1.5rem 5rem' }}>
+        <div style={{ maxWidth: 860, margin: '0 auto' }}>
+          <Card>
+            <CardHeader style={{ justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span className="sku-screw" aria-hidden="true" />
+                <Led color="amber" />
+                <span className="sku-label">Everything You Need to Succeed</span>
+              </div>
+              <span className="sku-screw" aria-hidden="true" />
+            </CardHeader>
+            <CardContent>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: '1rem' }}>
+                {checklist.map((item, i) => (
+                  <div key={i} style={{
+                    display: 'flex', alignItems: 'center', gap: 12,
+                    padding: '0.85rem 1rem',
+                    background: 'linear-gradient(145deg,#252525,#1e1e1e)',
+                    border: '1px solid #1a1a1a', borderTop: '1px solid #333',
+                    borderRadius: 5,
+                    boxShadow: '2px 2px 6px rgba(0,0,0,0.6),-1px -1px 3px rgba(255,255,255,0.04)',
+                  }}>
+                    <div className="sku-knob" style={{ width: 34, height: 34 }} aria-hidden="true">
+                      <item.icon size={14} color="var(--sku-amber-hi)" />
+                    </div>
+                    <span style={{ fontFamily: 'Roboto Condensed, sans-serif', fontSize: '0.82rem', color: 'var(--sku-metal-mid)', letterSpacing: '0.02em' }}>
+                      {item.text}
+                    </span>
                   </div>
-                  <span className="text-sm sm:text-base font-medium text-gray-900 dark:text-white">
-                    {benefit.text}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </section>
 
-      {/* CTA Section - Mobile Optimized */}
-      <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center space-y-6 sm:space-y-8">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white px-4">
-            Ready to Ace Your Interview?
-          </h2>
-          <p className="text-sm sm:text-base lg:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto px-4 sm:px-6">
-            Join thousands of developers who have improved their interview skills with our AI-powered platform
+      {/* ── BOTTOM CTA ────────────────────────────────────────── */}
+      <section style={{ padding: '4rem 1.5rem', textAlign: 'center', background: 'linear-gradient(180deg,#1a1a1a,#111)', borderTop: '2px solid #0a0a0a' }}>
+        <div style={{ maxWidth: 600, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.5rem', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <Led color="amber" blink /><Led color="green" blink /><Led color="amber" blink />
+          </div>
+          <h2 className="sku-heading" style={{ fontSize: 'clamp(1.5rem,4vw,2.4rem)' }}>Ready to Ace Your Interview?</h2>
+          <p style={{ fontFamily: 'Roboto Condensed, sans-serif', color: 'var(--sku-metal-dark)', fontSize: '0.9rem', lineHeight: 1.6 }}>
+            Join thousands of developers who have improved their interview performance with our AI-powered practice system.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-4 px-4 sm:px-0">
-            <Button
-              asChild
-              size="lg"
-              className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all text-sm sm:text-base px-6 sm:px-8 py-5 sm:py-6"
-            >
-              <Link href="/sign-up" className="flex items-center justify-center">
-                Start Practicing Now
-                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
-              </Link>
-            </Button>
-            <Button
-              asChild
-              variant="outline"
-              size="lg"
-              className="w-full sm:w-auto text-sm sm:text-base px-6 sm:px-8 py-5 sm:py-6 border-2"
-            >
-              <Link href="/leaderboard">View Leaderboard</Link>
-            </Button>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <Link href="/sign-up">
+              <Button id="cta-start-btn" size="lg" className="sku-glow-pulse">
+                Start Practicing Now <ArrowRight size={16} style={{ marginLeft: 8 }} />
+              </Button>
+            </Link>
+            <Link href="/leaderboard">
+              <Button id="cta-leaderboard-btn" variant="secondary" size="lg">
+                <Trophy size={15} style={{ marginRight: 8 }} /> View Leaderboard
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

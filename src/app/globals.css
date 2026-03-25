@@ -1,138 +1,688 @@
+/* ============================================================
+   INTERVIEW AI — SKEUOMORPHIC DESIGN SYSTEM
+   All surfaces simulate physical real-world materials.
+   Light source: top-left. Materials: brushed aluminum, metal,
+   leather, LCD, glass. Zero flat design elements.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Roboto+Condensed:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* CSS Variables for Theme */
+/* ─── SKEUOMORPHIC TOKEN SYSTEM ─────────────────────────── */
 :root {
-  /* Light Mode Colors */
-  --background: 255 255 255;
-  --foreground: 15 23 42;
-  --card: 255 255 255;
-  --card-foreground: 15 23 42;
-  --primary: 59 130 246;
-  --primary-foreground: 255 255 255;
-  --secondary: 148 163 184;
-  --secondary-foreground: 15 23 42;
-  --muted: 241 245 249;
-  --muted-foreground: 100 116 139;
-  --accent: 241 245 249;
-  --accent-foreground: 15 23 42;
-  --border: 226 232 240;
-  --input: 226 232 240;
+  /* Core palette — brushed metal & dark chrome */
+  --sku-bg:             #1a1a1a;
+  --sku-surface:        #2c2c2c;
+  --sku-surface-hi:     #3a3a3a;
+  --sku-metal-light:    #e8e8e8;
+  --sku-metal-mid:      #b0b0b0;
+  --sku-metal-dark:     #888888;
+
+  /* Accent — amber warm glow for hover states */
+  --sku-amber:          #d4820a;
+  --sku-amber-glow:     rgba(212, 130, 10, 0.35);
+  --sku-amber-hi:       #f0a830;
+  --sku-green-lcd:      #00ff41;
+  --sku-green-lcd-dim:  #009926;
+
+  /* Shadows — simulate top-left light source */
+  --shadow-raised:      4px 4px 12px rgba(0,0,0,0.7), -2px -2px 6px rgba(255,255,255,0.06);
+  --shadow-inset:       inset 2px 2px 6px rgba(0,0,0,0.8), inset -1px -1px 4px rgba(255,255,255,0.08);
+  --shadow-press:       inset 3px 3px 8px rgba(0,0,0,0.9), inset -1px -1px 2px rgba(255,255,255,0.04);
+  --shadow-btn:         0 6px 0 #0a0a0a, 0 8px 14px rgba(0,0,0,0.7);
+  --shadow-btn-press:   0 2px 0 #0a0a0a, 0 3px 6px rgba(0,0,0,0.6);
+  --shadow-panel:       6px 6px 20px rgba(0,0,0,0.8), -2px -2px 8px rgba(255,255,255,0.04);
+  --shadow-led-green:   0 0 6px #00ff41, 0 0 12px rgba(0,255,65,0.5);
+  --shadow-led-amber:   0 0 6px #d4820a, 0 0 12px rgba(212,130,10,0.5);
+  --shadow-led-red:     0 0 6px #e53e3e, 0 0 12px rgba(229,62,62,0.5);
+  --shadow-screw:       inset 1px 1px 3px rgba(255,255,255,0.2), inset -1px -1px 3px rgba(0,0,0,0.8);
+
+  /* Transitions */
+  --t-ui:               150ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.dark {
-  /* Dark Mode Colors */
-  --background: 15 23 42;
-  --foreground: 248 250 252;
-  --card: 30 41 59;
-  --card-foreground: 248 250 252;
-  --primary: 96 165 250;
-  --primary-foreground: 15 23 42;
-  --secondary: 71 85 105;
-  --secondary-foreground: 248 250 252;
-  --muted: 51 65 85;
-  --muted-foreground: 148 163 184;
-  --accent: 51 65 85;
-  --accent-foreground: 248 250 252;
-  --border: 51 65 85;
-  --input: 51 65 85;
+/* ─── GLOBAL RESET & BASE ────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-/* Base Styles */
-* {
-  @apply border-border;
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  @apply bg-white dark:bg-slate-900 text-gray-900 dark:text-white;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  font-family: 'Roboto Condensed', 'Oswald', sans-serif;
+  background-color: var(--sku-bg);
+  color: var(--sku-metal-light);
+  /* Dark brushed-aluminum body background */
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      rgba(255,255,255,0.015) 1px,
+      transparent 2px,
+      transparent 4px
+    ),
+    repeating-linear-gradient(
+      180deg,
+      transparent 0px,
+      rgba(0,0,0,0.1) 1px,
+      transparent 2px,
+      transparent 60px
+    );
+  min-height: 100vh;
+  /* Disable global theme transitions except where specified */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Smooth transitions for theme changes */
+/* Prevent Tailwind's forced transition-all from ruining press animations */
 * {
-  transition-property: background-color, border-color, color, fill, stroke;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 200ms;
+  transition-property: none;
 }
 
-/* Text Colors */
-.text-foreground {
-  color: rgb(var(--foreground));
+/* ─── TYPOGRAPHY — ENGRAVED & EMBOSSED ──────────────────── */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
-.text-muted {
-  color: rgb(var(--muted-foreground));
+/* Engraved heading effect */
+.sku-heading {
+  color: var(--sku-metal-light);
+  text-shadow:
+    1px 1px 0 rgba(255,255,255,0.12),
+    -1px -1px 0 rgba(0,0,0,0.6),
+    0 2px 4px rgba(0,0,0,0.5);
 }
 
-/* Background Colors */
-.bg-background {
-  background-color: rgb(var(--background));
+/* Label style — small engraved uppercase */
+.sku-label {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--sku-metal-dark);
+  text-shadow: 0 1px 0 rgba(0,0,0,0.8), 0 -1px 0 rgba(255,255,255,0.05);
 }
 
-.bg-card {
-  background-color: rgb(var(--card));
+/* ─── BRUSHED ALUMINUM SURFACE ───────────────────────────── */
+.sku-metal {
+  background: linear-gradient(
+    145deg,
+    #d8d8d8 0%,
+    #c0c0c0 20%,
+    #a8a8a8 40%,
+    #c4c4c4 60%,
+    #d0d0d0 80%,
+    #b8b8b8 100%
+  );
+  box-shadow: var(--shadow-raised);
 }
 
-/* Animations */
-@keyframes blob {
-  0%, 100% { 
-    transform: translate(0, 0) scale(1); 
-  }
-  33% { 
-    transform: translate(30px, -50px) scale(1.1); 
-  }
-  66% { 
-    transform: translate(-20px, 20px) scale(0.9); 
-  }
+/* Dark brushed panel (most common surface) */
+.sku-panel {
+  background:
+    repeating-linear-gradient(
+      92deg,
+      rgba(255,255,255,0.018) 0px,
+      rgba(255,255,255,0.018) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    linear-gradient(180deg, #363636 0%, #2a2a2a 50%, #262626 100%);
+  border: 1px solid #1a1a1a;
+  border-top-color: #4a4a4a;
+  border-left-color: #404040;
+  box-shadow: var(--shadow-panel);
+  position: relative;
 }
 
-.animate-blob {
-  animation: blob 7s infinite;
+/* Light aluminum panel for navbar / header */
+.sku-panel-light {
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(255,255,255,0.04) 0px,
+      rgba(255,255,255,0.04) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    linear-gradient(180deg, #4a4a4a 0%, #353535 40%, #2e2e2e 100%);
+  border-bottom: 2px solid #1a1a1a;
+  border-top: 1px solid #5a5a5a;
+  box-shadow:
+    0 4px 16px rgba(0,0,0,0.8),
+    0 1px 0 rgba(255,255,255,0.08) inset;
 }
 
-.animation-delay-2000 {
-  animation-delay: 2s;
+/* ─── DECORATIVE SCREWS ──────────────────────────────────── */
+.sku-screw {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #c0c0c0, #666);
+  box-shadow: var(--shadow-screw);
+  position: relative;
+  flex-shrink: 0;
 }
 
-.animation-delay-4000 {
-  animation-delay: 4s;
+.sku-screw::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 10%;
+  right: 10%;
+  height: 1.5px;
+  background: rgba(0,0,0,0.6);
+  transform: translateY(-50%) rotate(45deg);
+  border-radius: 2px;
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.sku-screw::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 10%;
+  bottom: 10%;
+  width: 1.5px;
+  background: rgba(0,0,0,0.6);
+  transform: translateX(-50%) rotate(45deg);
+  border-radius: 2px;
+  z-index: 1;
 }
 
-.animate-slideDown {
-  animation: slideDown 0.2s ease-out;
+/* ─── PHYSICAL BUTTONS ───────────────────────────────────── */
+.sku-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Oswald', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  padding: 0.65rem 1.5rem;
+  border-radius: 5px;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  position: relative;
+  transition: transform var(--t-ui), box-shadow var(--t-ui), background var(--t-ui);
+  user-select: none;
+  -webkit-user-select: none;
 }
 
-/* Scrollbar Styling */
-::-webkit-scrollbar {
+/* Primary metal button — amber accent */
+.sku-btn-primary {
+  background: linear-gradient(180deg, #e09030 0%, #b06010 40%, #c07020 100%);
+  color: #1a0e00;
+  box-shadow: var(--shadow-btn);
+  border-top: 1px solid #f0b040;
+  text-shadow: 0 1px 0 rgba(255,200,0,0.3);
+}
+
+.sku-btn-primary:hover {
+  background: linear-gradient(180deg, #f0a030 0%, #c07020 40%, #d08030 100%);
+  box-shadow: var(--shadow-btn), 0 0 16px var(--sku-amber-glow);
+}
+
+.sku-btn-primary:active {
+  transform: translateY(4px);
+  box-shadow: var(--shadow-btn-press);
+}
+
+/* Secondary metal button — chrome */
+.sku-btn-secondary {
+  background: linear-gradient(180deg, #555 0%, #333 40%, #3e3e3e 100%);
+  color: var(--sku-metal-light);
+  box-shadow: var(--shadow-btn);
+  border-top: 1px solid #666;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+
+.sku-btn-secondary:hover {
+  background: linear-gradient(180deg, #666 0%, #444 40%, #505050 100%);
+  box-shadow: var(--shadow-btn), 0 0 12px rgba(200,200,200,0.1);
+}
+
+.sku-btn-secondary:active {
+  transform: translateY(4px);
+  box-shadow: var(--shadow-btn-press);
+}
+
+/* Danger button — dark red */
+.sku-btn-danger {
+  background: linear-gradient(180deg, #c03030 0%, #7a1818 40%, #922020 100%);
+  color: #ffe0e0;
+  box-shadow: 0 6px 0 #2a0000, 0 8px 14px rgba(0,0,0,0.7);
+  border-top: 1px solid #e04040;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.sku-btn-danger:hover {
+  background: linear-gradient(180deg, #d04040 0%, #8a1818 40%, #a03030 100%);
+  box-shadow: 0 6px 0 #2a0000, 0 8px 14px rgba(0,0,0,0.7), 0 0 16px rgba(200,0,0,0.3);
+}
+
+.sku-btn-danger:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #2a0000, 0 3px 6px rgba(0,0,0,0.6);
+}
+
+/* Ghost/nav button */
+.sku-btn-ghost {
+  background: transparent;
+  color: var(--sku-metal-mid);
+  box-shadow: none;
+  border: 1px solid transparent;
+  letter-spacing: 0.1em;
+  transition: color var(--t-ui), border-color var(--t-ui), background var(--t-ui);
+}
+
+.sku-btn-ghost:hover {
+  color: var(--sku-amber-hi);
+  border-color: rgba(212, 130, 10, 0.4);
+  background: rgba(212, 130, 10, 0.08);
+  box-shadow: 0 0 8px var(--sku-amber-glow);
+}
+
+/* Active nav link */
+.sku-nav-active {
+  color: var(--sku-amber-hi);
+  background: rgba(212, 130, 10, 0.12);
+  border: 1px solid rgba(212, 130, 10, 0.35);
+  text-shadow: 0 0 8px var(--sku-amber-glow);
+}
+
+/* ─── ENGRAVED INPUT FIELDS ──────────────────────────────── */
+.sku-input {
+  background: #111;
+  border: 1px solid #1a1a1a;
+  border-top-color: #0a0a0a;
+  border-left-color: #0e0e0e;
+  border-right-color: #333;
+  border-bottom-color: #333;
+  box-shadow: var(--shadow-inset);
+  color: var(--sku-metal-light);
+  font-family: 'Roboto Condensed', sans-serif;
+  font-size: 0.95rem;
+  padding: 0.65rem 1rem;
+  border-radius: 4px;
+  outline: none;
+  width: 100%;
+  transition: box-shadow var(--t-ui), border-color var(--t-ui);
+}
+
+.sku-input:focus {
+  border-color: var(--sku-amber);
+  box-shadow: var(--shadow-press), 0 0 0 2px rgba(212, 130, 10, 0.25);
+}
+
+.sku-input::placeholder {
+  color: #555;
+  font-style: italic;
+}
+
+/* ─── LCD / MONOCHROME DISPLAY ───────────────────────────── */
+.sku-lcd {
+  background: #0a150a;
+  color: var(--sku-green-lcd);
+  font-family: 'Share Tech Mono', 'Courier New', monospace;
+  border: 2px solid #000;
+  border-radius: 4px;
+  box-shadow:
+    inset 0 0 20px rgba(0,0,0,0.9),
+    inset 0 0 4px rgba(0,255,65,0.08),
+    0 2px 8px rgba(0,0,0,0.8);
+  padding: 0.75rem 1rem;
+  text-shadow: 0 0 8px rgba(0,255,65,0.8), 0 0 2px rgba(0,255,65,1);
+  letter-spacing: 0.05em;
+  line-height: 1.6;
+}
+
+/* Scanline overlay on LCD */
+.sku-lcd::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.15) 2px,
+    rgba(0,0,0,0.15) 4px
+  );
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* ─── LED INDICATORS ─────────────────────────────────────── */
+.sku-led {
   width: 10px;
   height: 10px;
+  border-radius: 50%;
+  border: 1px solid rgba(0,0,0,0.5);
+  position: relative;
+  flex-shrink: 0;
 }
 
+.sku-led::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.5);
+}
+
+.sku-led-green {
+  background: radial-gradient(circle at 35% 35%, #80ff90, #00cc33);
+  box-shadow: var(--shadow-led-green);
+}
+
+.sku-led-amber {
+  background: radial-gradient(circle at 35% 35%, #ffd080, #cc8800);
+  box-shadow: var(--shadow-led-amber);
+}
+
+.sku-led-red {
+  background: radial-gradient(circle at 35% 35%, #ff8080, #cc2222);
+  box-shadow: var(--shadow-led-red);
+}
+
+.sku-led-off {
+  background: radial-gradient(circle at 35% 35%, #444, #222);
+  box-shadow: inset 1px 1px 3px rgba(0,0,0,0.8);
+}
+
+/* ─── TOGGLE SWITCH ──────────────────────────────────────── */
+.sku-toggle {
+  position: relative;
+  display: inline-block;
+  width: 52px;
+  height: 26px;
+  flex-shrink: 0;
+}
+
+.sku-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.sku-toggle-track {
+  position: absolute;
+  inset: 0;
+  border-radius: 13px;
+  background: #111;
+  box-shadow: var(--shadow-inset);
+  border: 1px solid #0a0a0a;
+  cursor: pointer;
+  transition: background var(--t-ui);
+}
+
+.sku-toggle input:checked ~ .sku-toggle-track {
+  background: #0a1f0a;
+}
+
+.sku-toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #e0e0e0, #999);
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.7), -1px -1px 3px rgba(255,255,255,0.15);
+  transition: transform 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  pointer-events: none;
+}
+
+.sku-toggle input:checked ~ .sku-toggle-track .sku-toggle-thumb {
+  transform: translateX(26px);
+}
+
+.sku-toggle input:checked ~ .sku-toggle-track {
+  box-shadow: var(--shadow-inset), inset 0 0 10px rgba(0,255,65,0.15);
+}
+
+/* ─── ANALOG VU / FUEL METER (progress bar) ──────────────── */
+.sku-meter-track {
+  height: 14px;
+  background: #0d0d0d;
+  border-radius: 7px;
+  box-shadow: var(--shadow-inset);
+  border: 1px solid #0a0a0a;
+  overflow: hidden;
+  position: relative;
+}
+
+.sku-meter-fill {
+  height: 100%;
+  border-radius: 7px;
+  background: linear-gradient(90deg, #006600 0%, #00cc44 60%, #80ff80 95%, #ffffff 100%);
+  box-shadow: 0 0 8px rgba(0,200,60,0.6), inset 0 1px 0 rgba(255,255,255,0.3);
+  position: relative;
+  transition: width 600ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* VU-style tick marks overlay */
+.sku-meter-track::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 9px,
+    rgba(0,0,0,0.4) 9px,
+    rgba(0,0,0,0.4) 10px
+  );
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* Amber meter for score */
+.sku-meter-fill-amber {
+  background: linear-gradient(90deg, #552200 0%, #d4820a 60%, #ffd080 95%, #ffffff 100%);
+  box-shadow: 0 0 8px rgba(212,130,10,0.6), inset 0 1px 0 rgba(255,255,255,0.3);
+}
+
+/* ─── DASHBOARD CARD / HARDWARE PANEL ───────────────────── */
+.sku-card {
+  background:
+    repeating-linear-gradient(
+      93deg,
+      rgba(255,255,255,0.014) 0px,
+      rgba(255,255,255,0.014) 1px,
+      transparent 1px,
+      transparent 4px
+    ),
+    linear-gradient(170deg, #363636 0%, #2c2c2c 60%, #252525 100%);
+  border: 1px solid #1e1e1e;
+  border-top: 1px solid #484848;
+  border-left: 1px solid #404040;
+  border-radius: 6px;
+  box-shadow: var(--shadow-panel);
+  transition: box-shadow var(--t-ui);
+  overflow: hidden;
+}
+
+.sku-card:hover {
+  box-shadow: var(--shadow-panel), 0 0 20px rgba(212,130,10,0.1);
+}
+
+.sku-card-header {
+  background: linear-gradient(180deg, #3e3e3e, #303030);
+  border-bottom: 1px solid #1a1a1a;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ─── KNOB / DIAL ELEMENT ───────────────────────────────── */
+.sku-knob {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #d8d8d8, #888, #555);
+  border: 3px solid #222;
+  box-shadow:
+    4px 4px 10px rgba(0,0,0,0.7),
+    -2px -2px 6px rgba(255,255,255,0.12),
+    inset 1px 1px 2px rgba(255,255,255,0.3),
+    inset -1px -1px 2px rgba(0,0,0,0.6);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sku-knob::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3px;
+  height: 10px;
+  background: linear-gradient(180deg, #333, #111);
+  border-radius: 2px;
+  box-shadow: 0 0 2px rgba(0,0,0,0.8);
+}
+
+/* ─── LAYOUT UTILITIES ───────────────────────────────────── */
+.sku-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #444, #222, #444, transparent);
+  border: none;
+  margin: 0;
+}
+
+.sku-section-gap {
+  /* Recessed channel between panel sections */
+  height: 4px;
+  background: linear-gradient(180deg, #0a0a0a, #1a1a1a);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.9);
+}
+
+/* ─── SCROLLBAR ──────────────────────────────────────────── */
+::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track {
-  @apply bg-gray-100 dark:bg-slate-800;
+  background: #111;
+  box-shadow: inset 1px 0 3px rgba(0,0,0,0.6);
 }
-
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-400 dark:bg-slate-600 rounded-lg;
+  background: linear-gradient(180deg, #555, #333);
+  border-radius: 4px;
+  border: 1px solid #222;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-500 dark:bg-slate-500;
+  background: linear-gradient(180deg, #666, #444);
 }
 
-/* Selection */
+/* ─── SELECTION ──────────────────────────────────────────── */
 ::selection {
-  @apply bg-blue-200 dark:bg-blue-900 text-gray-900 dark:text-white;
+  background: rgba(212, 130, 10, 0.35);
+  color: #fff;
+}
+
+/* ─── LOADING SPINNER ────────────────────────────────────── */
+.sku-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #333;
+  border-top-color: var(--sku-amber);
+  border-radius: 50%;
+  animation: sku-spin 0.8s linear infinite;
+  box-shadow: 0 0 10px var(--sku-amber-glow);
+}
+
+@keyframes sku-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── LED BLINK ANIMATION ────────────────────────────────── */
+@keyframes sku-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.sku-led-blink {
+  animation: sku-blink 1.4s ease-in-out infinite;
+}
+
+/* ─── WARM GLOW PULSE (for active elements) ─────────────── */
+@keyframes sku-glow-pulse {
+  0%, 100% { box-shadow: var(--shadow-panel), 0 0 10px var(--sku-amber-glow); }
+  50% { box-shadow: var(--shadow-panel), 0 0 24px rgba(212,130,10,0.45); }
+}
+
+.sku-glow-pulse {
+  animation: sku-glow-pulse 2.5s ease-in-out infinite;
+}
+
+/* ─── METER NEEDLE ANIMATION ─────────────────────────────── */
+@keyframes sku-needle {
+  0% { width: 0; }
+}
+
+.sku-meter-fill {
+  animation: sku-needle 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* ─── BADGE / CHIP ───────────────────────────────────────── */
+.sku-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 3px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.sku-badge-green {
+  background: #0a1f0a;
+  color: var(--sku-green-lcd);
+  border: 1px solid #1a5a1a;
+  box-shadow: inset 0 0 6px rgba(0,255,65,0.1);
+  text-shadow: 0 0 6px rgba(0,255,65,0.6);
+}
+
+.sku-badge-amber {
+  background: #1f1200;
+  color: var(--sku-amber-hi);
+  border: 1px solid #5a3a00;
+  box-shadow: inset 0 0 6px rgba(212,130,10,0.1);
+}
+
+.sku-badge-red {
+  background: #1f0000;
+  color: #ff6060;
+  border: 1px solid #5a0000;
+}
+
+/* ─── RESPONSIVE UTILITIES ───────────────────────────────── */
+@media (max-width: 640px) {
+  .sku-btn { font-size: 0.72rem; padding: 0.55rem 1.1rem; }
+  .sku-knob { width: 38px; height: 38px; }
 }

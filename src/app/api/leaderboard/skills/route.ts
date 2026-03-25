@@ -1,3 +1,4 @@
+// \src\app\api\leaderboard\skills\route.ts
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 

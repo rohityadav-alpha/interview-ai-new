@@ -1,3 +1,4 @@
+// \src\app\api\email\send-with-sendgrid\route.ts
 import { NextResponse } from 'next/server';
 import sgMail from '@sendgrid/mail';
 

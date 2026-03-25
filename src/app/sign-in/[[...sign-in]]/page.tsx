@@ -1,131 +1,184 @@
 // src/app/sign-in/[[...sign-in]]/page.tsx
+// Skeuomorphic Sign-In — dark brushed-aluminum control room login panel.
+
 'use client';
 
 import { SignIn } from '@clerk/nextjs';
-import { Shield, Users, Award, ArrowRight } from 'lucide-react';
-
-import { Brain, Zap, Trophy, TrendingUp, Sparkles } from 'lucide-react';
+import { Brain, Zap, Trophy, TrendingUp, Shield, Users, Award } from 'lucide-react';
 
 export default function SignInPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
-  {/* Background Decorations - Enhanced */}
-  <div className="absolute inset-0 overflow-hidden pointer-events-none">
-    <div className="absolute -top-20 sm:-top-40 -right-20 sm:-right-40 w-64 h-64 sm:w-96 sm:h-96 bg-blue-300 dark:bg-blue-900 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-3xl opacity-20 dark:opacity-10 animate-blob"></div>
-    <div className="absolute -bottom-20 sm:-bottom-40 -left-20 sm:-left-40 w-64 h-64 sm:w-96 sm:h-96 bg-purple-300 dark:bg-purple-900 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-3xl opacity-20 dark:opacity-10 animate-blob animation-delay-2000"></div>
-    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 sm:w-96 sm:h-96 bg-pink-300 dark:bg-pink-900 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-3xl opacity-20 dark:opacity-10 animate-blob animation-delay-4000"></div>
-  </div>
+    <div
+      style={{
+        minHeight: '100vh',
+        background:
+          'repeating-linear-gradient(90deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 5px), linear-gradient(160deg, #1e1e1e 0%, #161616 100%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '2rem 1rem',
+      }}
+    >
+      <div style={{ width: '100%', maxWidth: 440, display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-  <div className="relative max-w-md w-full space-y-6 sm:space-y-8">
-    {/* Header - Mobile Optimized */}
-    <div className="text-center">
-      <div className="inline-flex items-center justify-center mb-4 sm:mb-6">
-        <div className="relative">
-          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-2xl animate-pulse">
-            <Brain className="w-9 h-9 sm:w-11 sm:h-11 text-white" />
-          </div>
-          {/* Decorative badge */}
-          <div className="absolute -top-1.5 sm:-top-2 -right-1.5 sm:-right-2 w-6 h-6 sm:w-8 sm:h-8 bg-green-500 rounded-full flex items-center justify-center shadow-lg border-2 border-white dark:border-slate-900 animate-bounce">
-            <Sparkles className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-white" />
-          </div>
-          {/* Pulse rings */}
-          <div className="absolute inset-0 rounded-2xl border-4 border-blue-400/30 animate-ping"></div>
-          <div className="absolute inset-0 rounded-2xl border-4 border-purple-400/20 animate-pulse"></div>
-        </div>
-      </div>
-      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 sm:mb-3 px-4">
-        <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-          Welcome to Interview AI
-        </span>
-      </h1>
-      <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base lg:text-lg px-4">
-        Sign in to continue your interview journey
-      </p>
-    </div>
-
-    {/* Clerk Sign In Component - Enhanced */}
-    <div className="flex justify-center">
-      <SignIn 
-        appearance={{
-          elements: {
-            rootBox: "mx-auto w-full",
-            card: "bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm shadow-2xl border-2 border-gray-200 dark:border-slate-700 rounded-2xl",
-            formButtonPrimary: "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg",
-            footerActionLink: "text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300",
-            formFieldInput: "border-2 focus:border-blue-500 dark:border-slate-600 dark:bg-slate-900 dark:text-white",
-            headerTitle: "text-2xl font-bold text-gray-900 dark:text-white",
-            headerSubtitle: "text-gray-600 dark:text-gray-400",
-            socialButtonsBlockButton: "border-2 dark:border-slate-600 dark:bg-slate-900 dark:hover:bg-slate-800",
-            dividerLine: "bg-gray-300 dark:bg-slate-600",
-            dividerText: "text-gray-500 dark:text-gray-400",
-          }
-        }}
-      />
-    </div>
-
-    {/* Features - Enhanced Cards */}
-    <div className="mt-6 sm:mt-8 space-y-2 sm:space-y-3">
-      {[
-        { icon: Zap, text: 'AI-powered interview practice', gradient: 'from-blue-500 to-blue-600' },
-        { icon: Trophy, text: 'Instant feedback & scoring', gradient: 'from-purple-500 to-purple-600' },
-        { icon: TrendingUp, text: 'Track your progress', gradient: 'from-pink-500 to-pink-600' },
-      ].map((feature, index) => (
+        {/* ─── Panel Header ─── */}
         <div
-          key={index}
-          className="flex items-center space-x-3 p-3 sm:p-4 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-md border-2 border-gray-200 dark:border-slate-700 hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-600 transition-all transform hover:-translate-y-1 group"
-          style={{ animationDelay: `${index * 100}ms` }}
+          className="sku-panel"
+          style={{ borderRadius: 8, overflow: 'hidden' }}
         >
-          <div className={`w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br ${feature.gradient} rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform flex-shrink-0`}>
-            <feature.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+          <div className="sku-card-header" style={{ justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span className="sku-screw" aria-hidden="true" />
+              <span className="sku-led sku-led-green sku-led-blink" />
+              <span className="sku-label">Access Terminal</span>
+            </div>
+            <span className="sku-screw" aria-hidden="true" />
           </div>
-          <span className="text-sm sm:text-base text-gray-700 dark:text-gray-300 font-semibold">{feature.text}</span>
+
+          <div style={{ padding: '1.5rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
+            {/* Logo knob */}
+            <div
+              className="sku-knob"
+              style={{ width: 64, height: 64 }}
+              aria-hidden="true"
+            >
+              <Brain size={26} color="var(--sku-amber-hi)" />
+            </div>
+
+            <h1
+              className="sku-heading"
+              style={{ fontSize: 'clamp(1.2rem, 4vw, 1.6rem)', letterSpacing: '0.08em' }}
+            >
+              Welcome to Interview AI
+            </h1>
+            <p
+              style={{
+                fontFamily: 'Roboto Condensed, sans-serif',
+                color: 'var(--sku-metal-dark)',
+                fontSize: '0.82rem',
+                letterSpacing: '0.04em',
+              }}
+            >
+              Sign in to continue your interview journey
+            </p>
+
+            {/* LCD readout */}
+            <div
+              className="sku-lcd"
+              style={{ padding: '0.3rem 0.9rem', fontSize: '0.65rem', position: 'relative', width: '100%' }}
+            >
+              &gt; AUTHENTICATE TO CONTINUE SESSION
+            </div>
+          </div>
         </div>
-      ))}
-    </div>
 
-    {/* Trust Badges - New Section */}
-    <div className="flex flex-wrap justify-center items-center gap-3 sm:gap-4 pt-4 sm:pt-6 border-t-2 border-gray-200 dark:border-slate-700">
-      <div className="flex items-center space-x-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-        <Shield className="w-4 h-4 text-green-500" />
-        <span>Secure</span>
+        {/* ─── Clerk Sign In ─── */}
+        <div
+          className="sku-card"
+          style={{ padding: '1rem', overflow: 'hidden' }}
+        >
+          <SignIn
+            appearance={{
+              elements: {
+                rootBox: 'w-full',
+                card: 'bg-transparent shadow-none border-0 p-0',
+                headerTitle: 'hidden',
+                headerSubtitle: 'hidden',
+                socialButtonsBlockButton:
+                  'border border-[#3a3a3a] bg-[#242424] hover:bg-[#2e2e2e] text-[#b0b0b0] font-["Roboto_Condensed"] text-sm rounded',
+                dividerLine: 'bg-[#333]',
+                dividerText: 'text-[#666] font-["Roboto_Condensed"] text-xs',
+                formFieldLabel: 'text-[#888] font-["Oswald"] text-xs tracking-widest uppercase',
+                formFieldInput:
+                  'bg-[#111] border-[#1a1a1a] border-t-[#0a0a0a] text-[#e0e0e0] font-["Roboto_Condensed"] rounded shadow-[inset_2px_2px_6px_rgba(0,0,0,0.8),inset_-1px_-1px_4px_rgba(255,255,255,0.06)] focus:border-[#d4820a] focus:ring-0 placeholder-[#444]',
+                formButtonPrimary:
+                  'font-["Oswald"] tracking-widest uppercase text-sm bg-[linear-gradient(180deg,#e09030_0%,#b06010_40%,#c07020_100%)] text-[#1a0e00] border-t border-[#f0b040] shadow-[0_6px_0_#0a0a0a,0_8px_14px_rgba(0,0,0,0.7)] hover:shadow-[0_6px_0_#0a0a0a,0_8px_14px_rgba(0,0,0,0.7),0_0_16px_rgba(212,130,10,0.35)] active:translate-y-1 active:shadow-[0_2px_0_#0a0a0a,0_3px_6px_rgba(0,0,0,0.6)] rounded transition-all',
+                footerActionLink: 'text-[#d4820a] hover:text-[#f0a830]',
+                identityPreviewText: 'text-[#b0b0b0]',
+                formResendCodeLink: 'text-[#d4820a]',
+                otpCodeFieldInput: 'bg-[#111] border-[#333] text-[#00ff41] font-["Share_Tech_Mono"]',
+                alert: 'bg-[#1f0000] border border-[#5a0000] text-[#ff6060]',
+              },
+            }}
+          />
+        </div>
+
+        {/* ─── Feature strips ─── */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          {[
+            { icon: Zap, text: 'AI-powered interview practice' },
+            { icon: Trophy, text: 'Instant feedback & scoring' },
+            { icon: TrendingUp, text: 'Track your progress' },
+          ].map((f, i) => (
+            <div
+              key={i}
+              className="sku-card"
+              style={{ padding: '0.65rem 0.9rem', display: 'flex', alignItems: 'center', gap: 10 }}
+            >
+              <div className="sku-knob" style={{ width: 32, height: 32, flexShrink: 0 }}>
+                <f.icon size={13} color="var(--sku-amber-hi)" />
+              </div>
+              <span
+                style={{
+                  fontFamily: 'Roboto Condensed, sans-serif',
+                  fontSize: '0.8rem',
+                  color: 'var(--sku-metal-mid)',
+                }}
+              >
+                {f.text}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        {/* ─── Trust badges ─── */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '1.5rem',
+            flexWrap: 'wrap',
+            paddingTop: '0.5rem',
+            borderTop: '1px solid #222',
+          }}
+        >
+          {[
+            { icon: Shield, label: 'Secure' },
+            { icon: Users, label: '1000+ Users' },
+            { icon: Award, label: 'AI-Powered' },
+          ].map((b, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+              <b.icon size={13} color="var(--sku-metal-dark)" />
+              <span className="sku-label">{b.label}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Footer link */}
+        <p
+          style={{
+            textAlign: 'center',
+            fontFamily: 'Roboto Condensed, sans-serif',
+            fontSize: '0.75rem',
+            color: 'var(--sku-metal-dark)',
+          }}
+        >
+          No account?{' '}
+          <a
+            href="/sign-up"
+            style={{
+              color: 'var(--sku-amber-hi)',
+              textDecoration: 'none',
+              fontFamily: 'Oswald, sans-serif',
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+              fontSize: '0.72rem',
+            }}
+          >
+            Create one →
+          </a>
+        </p>
       </div>
-      <div className="flex items-center space-x-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-        <Users className="w-4 h-4 text-blue-500" />
-        <span>1000+ Users</span>
-      </div>
-      <div className="flex items-center space-x-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-        <Award className="w-4 h-4 text-purple-500" />
-        <span>AI-Powered</span>
-      </div>
     </div>
-
-    {/* Terms - Mobile Optimized */}
-    <p className="text-center text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-4 sm:mt-6 px-2">
-      By signing in, you agree to our{' '}
-      <a href="#" className="text-blue-600 dark:text-blue-400 hover:underline font-semibold">
-        Terms of Service
-      </a>{' '}
-      and{' '}
-      <a href="#" className="text-blue-600 dark:text-blue-400 hover:underline font-semibold">
-        Privacy Policy
-      </a>
-    </p>
-
-    {/* Footer CTA */}
-    <div className="text-center pt-4">
-      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-2">
-        Don't have an account?
-      </p>
-      <a 
-        href="/sign-up" 
-        className="inline-flex items-center space-x-2 text-sm sm:text-base font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
-      >
-        <span>Create one now</span>
-        <ArrowRight className="w-4 h-4" />
-      </a>
-    </div>
-  </div>
-</div>
-
   );
 }

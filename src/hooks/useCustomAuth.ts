@@ -1,3 +1,4 @@
+// src\hooks\useCustomAuth.ts
 'use client';
 
 import { useAuth, useUser } from '@clerk/nextjs';

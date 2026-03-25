@@ -1,12 +1,12 @@
 // src/app/leaderboard/page.tsx
+// Skeuomorphic Leaderboard — global ranking control panel with medal indicators.
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useCustomAuth } from '@/hooks/useCustomAuth';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Footer from '@/components/Footer';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Trophy, Medal, Award, TrendingUp, Filter, Crown, Sparkles } from 'lucide-react';
+import { Trophy, Award, TrendingUp, Filter, Crown } from 'lucide-react';
 
 interface LeaderboardEntry {
   rank: number;
@@ -18,6 +18,76 @@ interface LeaderboardEntry {
   interviewCount: number;
 }
 
+/* ── Atoms ────────────────────────────────────────────────── */
+function Led({ color }: { color: 'green' | 'amber' | 'red' | 'off' }) {
+  return (
+    <span
+      className={`sku-led sku-led-${color}`}
+      style={{ display: 'inline-block', flexShrink: 0 }}
+      aria-hidden="true"
+    />
+  );
+}
+
+function Meter({ value, total }: { value: number; total: number }) {
+  const pct = total > 0 ? (value / total) * 100 : 0;
+  return (
+    <div className="sku-meter-track" style={{ width: 80 }}>
+      <div className="sku-meter-fill sku-meter-fill-amber" style={{ width: `${Math.max(2, pct)}%` }} />
+    </div>
+  );
+}
+
+/* ── Rank badge ───────────────────────────────────────────── */
+function RankBadge({ rank }: { rank: number }) {
+  if (rank === 1) return (
+    <div
+      className="sku-knob"
+      style={{ width: 38, height: 38, background: 'radial-gradient(circle at 35% 35%, #ffd700, #b8860b)', flexShrink: 0 }}
+    >
+      <Crown size={14} color="#1a0e00" />
+    </div>
+  );
+  if (rank === 2) return (
+    <div
+      className="sku-knob"
+      style={{ width: 38, height: 38, background: 'radial-gradient(circle at 35% 35%, #e0e0e0, #888)', flexShrink: 0 }}
+    >
+      <Trophy size={14} color="#111" />
+    </div>
+  );
+  if (rank === 3) return (
+    <div
+      className="sku-knob"
+      style={{ width: 38, height: 38, background: 'radial-gradient(circle at 35% 35%, #f4a460, #8b4513)', flexShrink: 0 }}
+    >
+      <Award size={14} color="#1a0800" />
+    </div>
+  );
+  return (
+    <div
+      style={{
+        width: 38,
+        height: 38,
+        borderRadius: '50%',
+        background: 'linear-gradient(145deg, #2e2e2e, #1a1a1a)',
+        border: '1px solid #1a1a1a',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontFamily: 'Share Tech Mono, monospace',
+        fontSize: '0.72rem',
+        color: 'var(--sku-metal-dark)',
+        flexShrink: 0,
+        boxShadow: '2px 2px 5px rgba(0,0,0,0.6)',
+      }}
+    >
+      #{rank}
+    </div>
+  );
+}
+
+/* ── Main page ─────────────────────────────────────────────── */
 export default function LeaderboardPage() {
   const { userEmail } = useCustomAuth();
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -25,24 +95,17 @@ export default function LeaderboardPage() {
   const [skills, setSkills] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    fetchSkills();
-  }, []);
-
-  useEffect(() => {
-    fetchLeaderboard();
-  }, [selectedSkill]);
+  useEffect(() => { fetchSkills(); }, []);
+  useEffect(() => { fetchLeaderboard(); }, [selectedSkill]);
 
   const fetchSkills = async () => {
     try {
-      const response = await fetch('/api/leaderboard/skills');
-      if (response.ok) {
-        const data = await response.json();
+      const res = await fetch('/api/leaderboard/skills');
+      if (res.ok) {
+        const data = await res.json();
         setSkills(data.skills || []);
       }
-    } catch (error) {
-      console.error('Fetch skills error:', error);
-    }
+    } catch (e) { console.error(e); }
   };
 
   const fetchLeaderboard = async () => {
@@ -51,258 +114,280 @@ export default function LeaderboardPage() {
       const url = selectedSkill === 'all'
         ? '/api/leaderboard'
         : `/api/leaderboard?skill=${encodeURIComponent(selectedSkill)}`;
-      const response = await fetch(url);
-      if (response.ok) {
-        const data = await response.json();
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
         setLeaderboard(data.leaderboard || []);
       }
-    } catch (error) {
-      console.error('Fetch leaderboard error:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const getRankIcon = (rank: number) => {
-    if (rank === 1) return <Trophy className="w-6 h-6 text-yellow-500" />;
-    if (rank === 2) return <Medal className="w-6 h-6 text-gray-400" />;
-    if (rank === 3) return <Award className="w-6 h-6 text-orange-500" />;
-    return <span className="text-sm font-bold text-gray-600 dark:text-gray-400">#{rank}</span>;
-  };
-
-  const getRankBg = (rank: number) => {
-    if (rank === 1) return 'bg-gradient-to-r from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 border-yellow-300 dark:border-yellow-700';
-    if (rank === 2) return 'bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/20 dark:to-gray-700/20 border-gray-300 dark:border-gray-700';
-    if (rank === 3) return 'bg-gradient-to-r from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-300 dark:border-orange-700';
-    return 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700';
+    } catch (e) { console.error(e); }
+    finally { setIsLoading(false); }
   };
 
   const isCurrentUser = (email: string) => email === userEmail;
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 dark:from-slate-900 dark:to-slate-800">
-        <div className="text-center">
-          <div className="relative">
-            <div className="animate-spin rounded-full h-20 w-20 border-4 border-purple-200 dark:border-purple-800 border-t-purple-600 dark:border-t-purple-400 mx-auto"></div>
-            <Trophy className="w-10 h-10 text-purple-600 dark:text-purple-400 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
-          </div>
-          <p className="mt-4 text-gray-600 dark:text-gray-400 font-semibold">Loading leaderboard...</p>
+      <div style={{ minHeight: '100vh', background: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div className="sku-spinner" style={{ margin: '0 auto 1rem' }} />
+          <p className="sku-label">Loading Rankings…</p>
         </div>
       </div>
     );
   }
 
+  const topScore = leaderboard[0]?.totalScore || 100;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 py-6 sm:py-8">
-  <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-    {/* Header - Enhanced with Animation */}
-    <div className="text-center mb-6 sm:mb-8">
-      <div className="inline-flex items-center justify-center mb-3 sm:mb-4 relative">
-        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-2xl animate-pulse">
-          <Trophy className="w-9 h-9 sm:w-11 sm:h-11 text-white" />
+    <div style={{ minHeight: '100vh', background: '#1a1a1a' }}>
+
+      {/* ── Header ────────────────────────────────────────────── */}
+      <div
+        style={{
+          background: 'repeating-linear-gradient(90deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 5px), linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 100%)',
+          borderBottom: '3px solid #0d0d0d',
+          padding: '1.5rem',
+        }}
+      >
+        <div style={{ maxWidth: 1000, margin: '0 auto', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.6rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span className="sku-screw" aria-hidden="true" />
+            <Led color="amber" />
+            <h1 className="sku-heading" style={{ fontSize: 'clamp(1.2rem, 3vw, 1.8rem)' }}>Global Leaderboard</h1>
+            <Led color="amber" />
+            <span className="sku-screw" aria-hidden="true" />
+          </div>
+          <p style={{ fontFamily: 'Roboto Condensed, sans-serif', color: 'var(--sku-metal-dark)', fontSize: '0.82rem' }}>
+            Top performers across all interview sessions
+          </p>
         </div>
-        {/* Decorative rings */}
-        <div className="absolute inset-0 rounded-full border-4 border-yellow-400/20 animate-ping"></div>
-        <div className="absolute inset-0 rounded-full border-4 border-orange-400/20 animate-pulse"></div>
       </div>
-      <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3 px-4">
-        <span className="bg-gradient-to-r from-yellow-600 via-orange-600 to-red-600 bg-clip-text text-transparent animate-gradient">
-          Global Leaderboard
-        </span>
-      </h1>
-      <p className="text-base sm:text-lg lg:text-xl text-gray-600 dark:text-gray-300 px-4">
-        Top performers across all interviews 🌟
-      </p>
-    </div>
 
-    {/* Filter - Enhanced Card */}
-    <Card className="mb-4 sm:mb-6 shadow-xl border-2 border-purple-200 dark:border-purple-800 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm hover:shadow-2xl transition-all">
-      <CardContent className="p-3 sm:p-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
-          <div className="flex items-center space-x-2 sm:space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <Filter className="w-4 h-4 sm:w-5 sm:h-5 text-white flex-shrink-0" />
-            </div>
-            <label className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300">Filter by Skill:</label>
-          </div>
-          <Select value={selectedSkill} onValueChange={setSelectedSkill}>
-            <SelectTrigger className="w-full sm:w-[200px] border-2 dark:border-slate-600 dark:bg-slate-900 dark:text-gray-300 text-sm hover:border-purple-400 dark:hover:border-purple-600 transition-colors">
-              <SelectValue placeholder="All Skills" />
-            </SelectTrigger>
-            <SelectContent className="dark:bg-slate-800 dark:border-slate-700">
-              <SelectItem value="all" className="dark:text-gray-300 dark:focus:bg-slate-700 text-sm">All Skills</SelectItem>
-              {skills.map((skill) => (
-                <SelectItem key={skill} value={skill} className="dark:text-gray-300 dark:focus:bg-slate-700 text-sm">
-                  {skill}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </CardContent>
-    </Card>
+      <div style={{ maxWidth: 1000, margin: '0 auto', padding: '2rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-    {/* Leaderboard - Enhanced with Podium Effect */}
-    <Card className="shadow-2xl border-2 border-blue-200 dark:border-blue-800 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm">
-      <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border-b-2 dark:border-slate-700 p-4 sm:p-6">
-        <CardTitle className="flex items-center text-lg sm:text-xl lg:text-2xl text-gray-900 dark:text-white">
-          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mr-2 sm:mr-3">
-            <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-white flex-shrink-0" />
-          </div>
-          Top {leaderboard.length} Performers
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-3 sm:p-4 lg:p-6">
-        {leaderboard.length === 0 ? (
-          <div className="text-center py-12 sm:py-16">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/20 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 animate-bounce">
-              <Trophy className="w-10 h-10 sm:w-12 sm:h-12 text-purple-600 dark:text-purple-400" />
-            </div>
-            <p className="text-base sm:text-lg lg:text-xl text-gray-600 dark:text-gray-400 font-semibold px-4">
-              No entries yet. Be the first to appear! 🚀
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-2 sm:space-y-3">
-            {leaderboard.map((entry, idx) => {
-              const isPodium = entry.rank <= 3;
-              const podiumGradients: Record<number, string> = {
-                1: 'from-yellow-100 to-amber-100 dark:from-yellow-900/20 dark:to-amber-900/20 border-yellow-400 dark:border-yellow-600',
-                2: 'from-gray-100 to-slate-100 dark:from-gray-900/20 dark:to-slate-900/20 border-gray-400 dark:border-gray-600',
-                3: 'from-orange-100 to-red-100 dark:from-orange-900/20 dark:to-red-900/20 border-orange-400 dark:border-orange-600'
-              };
-
-              return (
-                <div
-                  key={`${entry.rank}-${entry.userEmail}`}
-                  className={`relative flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 lg:p-5 rounded-xl border-2 transition-all hover:shadow-lg transform hover:-translate-y-1 gap-3 sm:gap-4 group ${
-                  isPodium
-                   ? `bg-gradient-to-r ${podiumGradients[entry.rank] ?? ''} shadow-lg scale-105 sm:scale-100 hover:scale-105`
-                   : getRankBg(entry.rank)
-                  } ${isCurrentUser(entry.userEmail) ? 'ring-2 ring-blue-500 dark:ring-blue-400' : ''}`}
-                  style={{ animationDelay: `${idx * 50}ms` }}
-                >
-                  {/* Sparkle effect for top 3 */}
-                  {isPodium && (
-                    <div className="absolute -top-1 -right-1">
-                      <Sparkles className="w-4 h-4 text-yellow-500 animate-pulse" />
-                    </div>
-                  )}
-
-                  {/* Rank & User */}
-                  <div className="flex items-center space-x-3 sm:space-x-4 flex-1 w-full sm:w-auto">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                      {getRankIcon(entry.rank)}
-                    </div>
-
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-base sm:text-lg shadow-md flex-shrink-0 group-hover:scale-110 transition-transform">
-                      {entry.userName?.[0]?.toUpperCase() || 'U'}
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center space-x-2 flex-wrap gap-1">
-                        <h3 className="font-bold text-base sm:text-lg text-gray-900 dark:text-white truncate">
-                          {entry.userName || 'Anonymous'}
-                        </h3>
-                        {isCurrentUser(entry.userEmail) && (
-                          <span className="px-2 py-0.5 sm:py-1 bg-blue-500 text-white text-xs font-bold rounded-full shadow-md flex-shrink-0 animate-pulse">
-                            You
-                          </span>
-                        )}
-                        {isPodium && (
-                          <span className="px-1.5 py-0.5 bg-gradient-to-r from-yellow-400 to-orange-400 text-white text-[10px] font-bold rounded uppercase tracking-wide shadow-sm flex-shrink-0">
-                            Top {entry.rank}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">
-                        {entry.skill} • {entry.interviewCount} interview{entry.interviewCount !== 1 ? 's' : ''}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Scores - Enhanced */}
-                  <div className="flex items-center space-x-4 sm:space-x-6 w-full sm:w-auto justify-end">
-                    <div className="text-center relative">
-                      <p className="text-xl sm:text-2xl font-bold text-blue-600 dark:text-blue-400">{entry.totalScore}</p>
-                      <p className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 font-semibold">Total</p>
-                      {/* Progress indicator */}
-                      <div className="w-full h-1 bg-gray-200 dark:bg-slate-700 rounded-full mt-1 overflow-hidden">
-                        <div 
-                          className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-1000"
-                          style={{ width: `${Math.min((entry.totalScore / (leaderboard[0]?.totalScore || 100)) * 100, 100)}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                    <div className="text-center relative">
-                      <p className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400">{Number(entry.avgScore).toFixed(1)}</p>
-                      <p className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 font-semibold">Avg</p>
-                      {/* Progress indicator */}
-                      <div className="w-full h-1 bg-gray-200 dark:bg-slate-700 rounded-full mt-1 overflow-hidden">
-                        <div 
-                          className="h-full bg-gradient-to-r from-green-500 to-green-600 rounded-full transition-all duration-1000"
-                          style={{ width: `${(Number(entry.avgScore) / 10) * 100}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
+        {/* ── Stats row ─────────────────────────────────────────── */}
+        {leaderboard.length > 0 && (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              background: 'linear-gradient(180deg, #0d0d0d, #161616)',
+              border: '1px solid #1a1a1a',
+              borderRadius: 6,
+              overflow: 'hidden',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.8)',
+            }}
+          >
+            {[
+              { icon: TrendingUp, label: 'Participants', val: leaderboard.length, led: 'green' as const },
+              { icon: Trophy, label: 'Top Score', val: leaderboard[0]?.totalScore || 0, led: 'amber' as const },
+              {
+                icon: Award, label: 'Avg Score',
+                val: (leaderboard.reduce((s, e) => s + Number(e.avgScore), 0) / leaderboard.length).toFixed(1),
+                led: 'green' as const
+              },
+            ].map((s, i) => (
+              <div
+                key={i}
+                style={{
+                  padding: '1.25rem',
+                  textAlign: 'center',
+                  borderRight: i < 2 ? '1px solid #222' : 'none',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                  <Led color={s.led} />
+                  <span className="sku-label">{s.label}</span>
                 </div>
-              );
-            })}
+                <p
+                  className="sku-heading"
+                  style={{ fontSize: '1.8rem', color: 'var(--sku-amber-hi)', textShadow: '0 0 10px var(--sku-amber-glow)', fontFamily: 'Share Tech Mono, monospace' }}
+                >
+                  {s.val}
+                </p>
+              </div>
+            ))}
           </div>
         )}
-      </CardContent>
-    </Card>
 
-    {/* Stats - Enhanced Cards with Animations */}
-    {leaderboard.length > 0 && (
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-8">
-        <Card className="border-2 border-blue-200 dark:border-blue-800 shadow-xl bg-white dark:bg-slate-800 hover:shadow-2xl transition-all transform hover:-translate-y-1 group">
-          <CardContent className="p-4 sm:p-6 text-center">
-            <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3 shadow-lg group-hover:scale-110 transition-transform">
-              <TrendingUp className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
-            </div>
-            <p className="text-3xl sm:text-4xl font-bold text-blue-600 dark:text-blue-400 mb-1 group-hover:scale-110 transition-transform">{leaderboard.length}</p>
-            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-semibold">Total Participants</p>
-            <div className="w-full h-1 bg-blue-200 dark:bg-blue-900 rounded-full mt-2 overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full animate-pulse"></div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* ── Filter ──────────────────────────────────────────────── */}
+        <div className="sku-card" style={{ overflow: 'hidden' }}>
+          <div className="sku-card-header">
+            <Led color="amber" />
+            <Filter size={12} color="var(--sku-metal-dark)" />
+            <span className="sku-label">Filter by Skill Module</span>
+          </div>
+          <div style={{ padding: '1rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+            {['all', ...skills].map((s) => (
+              <button
+                key={s}
+                id={`filter-${s}`}
+                onClick={() => setSelectedSkill(s)}
+                className={`sku-btn ${selectedSkill === s ? 'sku-nav-active' : 'sku-btn-ghost'}`}
+                style={{ fontSize: '0.7rem', padding: '0.35rem 0.85rem' }}
+              >
+                {s === 'all' ? 'All Skills' : s}
+              </button>
+            ))}
+          </div>
+        </div>
 
-        <Card className="border-2 border-yellow-200 dark:border-yellow-800 shadow-xl bg-white dark:bg-slate-800 hover:shadow-2xl transition-all transform hover:-translate-y-1 group">
-          <CardContent className="p-4 sm:p-6 text-center">
-            <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3 shadow-lg group-hover:scale-110 transition-transform relative">
-              <Crown className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
-              <Sparkles className="w-3 h-3 text-yellow-300 absolute -top-1 -right-1 animate-pulse" />
+        {/* ── Rankings table ──────────────────────────────────────── */}
+        <div className="sku-card" style={{ overflow: 'hidden' }}>
+          <div className="sku-card-header" style={{ justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span className="sku-screw" aria-hidden="true" />
+              <Led color="green" />
+              <span className="sku-label">Top {leaderboard.length} Performers</span>
             </div>
-            <p className="text-3xl sm:text-4xl font-bold text-yellow-600 dark:text-yellow-400 mb-1 group-hover:scale-110 transition-transform">{leaderboard[0]?.totalScore || 0}</p>
-            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-semibold">Highest Score</p>
-            <div className="w-full h-1 bg-yellow-200 dark:bg-yellow-900 rounded-full mt-2 overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-full animate-pulse"></div>
-            </div>
-          </CardContent>
-        </Card>
+            <span className="sku-screw" aria-hidden="true" />
+          </div>
 
-        <Card className="border-2 border-green-200 dark:border-green-800 shadow-xl bg-white dark:bg-slate-800 hover:shadow-2xl transition-all transform hover:-translate-y-1 group sm:col-span-3 lg:col-span-1">
-          <CardContent className="p-4 sm:p-6 text-center">
-            <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3 shadow-lg group-hover:scale-110 transition-transform">
-              <Award className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
-            </div>
-            <p className="text-3xl sm:text-4xl font-bold text-green-600 dark:text-green-400 mb-1 group-hover:scale-110 transition-transform">
-              {(leaderboard.reduce((sum, e) => sum + Number(e.avgScore), 0) / leaderboard.length).toFixed(1)}
-            </p>
-            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-semibold">Average Score</p>
-            <div className="w-full h-1 bg-green-200 dark:bg-green-900 rounded-full mt-2 overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-green-500 to-green-600 rounded-full animate-pulse"></div>
-            </div>
-          </CardContent>
-        </Card>
+          <div style={{ padding: '1rem' }}>
+            {leaderboard.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '3rem 1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                <div className="sku-knob" style={{ width: 64, height: 64 }}>
+                  <Trophy size={24} color="var(--sku-metal-dark)" />
+                </div>
+                <h3 className="sku-heading" style={{ fontSize: '1rem' }}>No Entries Yet</h3>
+                <p style={{ fontFamily: 'Roboto Condensed, sans-serif', color: 'var(--sku-metal-dark)', fontSize: '0.82rem' }}>
+                  Be the first to appear on the leaderboard!
+                </p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem' }}>
+                {leaderboard.map((entry, idx) => {
+                  const isCurrent = isCurrentUser(entry.userEmail);
+                  const isPodium = entry.rank <= 3;
+
+                  return (
+                    <div
+                      key={`${entry.rank}-${entry.userEmail}`}
+                      id={`rank-${entry.rank}`}
+                      style={{
+                        padding: '0.85rem 1rem',
+                        borderRadius: 5,
+                        border: isCurrent
+                          ? '1px solid rgba(212,130,10,0.6)'
+                          : isPodium
+                          ? '1px solid rgba(212,130,10,0.25)'
+                          : '1px solid #1a1a1a',
+                        borderTop: isCurrent
+                          ? '1px solid rgba(212,130,10,0.8)'
+                          : isPodium
+                          ? '1px solid rgba(212,130,10,0.4)'
+                          : '1px solid #2e2e2e',
+                        background: isCurrent
+                          ? 'linear-gradient(145deg, #2a1800, #1a1000)'
+                          : isPodium
+                          ? 'linear-gradient(145deg, #252015, #1a1a12)'
+                          : 'linear-gradient(145deg, #272727, #1e1e1e)',
+                        boxShadow: isCurrent
+                          ? '2px 2px 8px rgba(0,0,0,0.7), 0 0 14px rgba(212,130,10,0.2)'
+                          : '2px 2px 6px rgba(0,0,0,0.6)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.75rem',
+                        flexWrap: 'wrap',
+                        transition: 'box-shadow 150ms ease',
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isCurrent) (e.currentTarget as HTMLElement).style.boxShadow = '2px 2px 8px rgba(0,0,0,0.7), 0 0 10px rgba(212,130,10,0.12)';
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isCurrent) (e.currentTarget as HTMLElement).style.boxShadow = '2px 2px 6px rgba(0,0,0,0.6)';
+                      }}
+                    >
+                      <RankBadge rank={entry.rank} />
+
+                      {/* Avatar */}
+                      <div
+                        style={{
+                          width: 34, height: 34, borderRadius: '50%',
+                          background: 'radial-gradient(circle at 35% 35%, #d0a040, #7a5010)',
+                          border: '2px solid #111',
+                          boxShadow: '2px 2px 5px rgba(0,0,0,0.7)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: '0.8rem', color: '#fff',
+                          flexShrink: 0,
+                        }}
+                      >
+                        {entry.userName?.[0]?.toUpperCase() || 'U'}
+                      </div>
+
+                      {/* Info */}
+                      <div style={{ flex: 1, minWidth: 120 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                          <span
+                            className="sku-heading"
+                            style={{ fontSize: '0.85rem', color: isCurrent ? 'var(--sku-amber-hi)' : 'var(--sku-metal-light)' }}
+                          >
+                            {entry.userName || 'Anonymous'}
+                          </span>
+                          {isCurrent && (
+                            <span
+                              className="sku-badge sku-badge-amber"
+                              style={{ fontSize: '0.58rem' }}
+                            >
+                              You
+                            </span>
+                          )}
+                          {isPodium && (
+                            <span
+                              className="sku-badge sku-badge-green"
+                              style={{ fontSize: '0.55rem' }}
+                            >
+                              Top {entry.rank}
+                            </span>
+                          )}
+                        </div>
+                        <span className="sku-label">
+                          {entry.skill} · {entry.interviewCount} session{entry.interviewCount !== 1 ? 's' : ''}
+                        </span>
+                      </div>
+
+                      {/* Scores + meter */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexShrink: 0 }}>
+                        <div style={{ textAlign: 'center' }}>
+                          <p
+                            style={{
+                              fontFamily: 'Share Tech Mono, monospace',
+                              fontSize: '1.3rem',
+                              color: 'var(--sku-amber-hi)',
+                              textShadow: '0 0 8px var(--sku-amber-glow)',
+                              lineHeight: 1,
+                            }}
+                          >
+                            {entry.totalScore}
+                          </p>
+                          <span className="sku-label">Total</span>
+                          <Meter value={entry.totalScore} total={topScore} />
+                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                          <p
+                            style={{
+                              fontFamily: 'Share Tech Mono, monospace',
+                              fontSize: '1.3rem',
+                              color: 'var(--sku-green-lcd)',
+                              textShadow: '0 0 6px rgba(0,255,65,0.6)',
+                              lineHeight: 1,
+                            }}
+                          >
+                            {Number(entry.avgScore).toFixed(1)}
+                          </p>
+                          <span className="sku-label">Avg</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-    )}
-  </div>
-  <Footer />
-</div>
+
+      <Footer />
+    </div>
   );
 }
