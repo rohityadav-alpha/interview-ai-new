@@ -46,16 +46,18 @@ export default function SimpleFaceTracker({ isInterviewActive }: SimpleFaceTrack
         videoRef.current.srcObject = stream;
         videoRef.current.onloadedmetadata = async () => {
           try {
-            await videoRef.current?.play();
-            setTimeout(() => { setIsStreaming(true); setIsEnabled(true); toast.success('Camera ON'); }, 100);
-          } catch { setError('Failed to start video'); }
+            if (videoRef.current?.paused) {
+              await videoRef.current?.play();
+            }
+            setTimeout(() => { setIsStreaming(true); setIsEnabled(true); }, 100);
+          } catch (e: any) {
+            // Ignore AbortError on play, log others
+            if (e.name !== 'AbortError') {
+              setError('Failed to start video');
+            }
+          }
         };
         videoRef.current.onplaying = () => { setIsStreaming(true); setIsEnabled(true); };
-        try {
-          await videoRef.current.play();
-          setIsStreaming(true); setIsEnabled(true);
-          toast.success('Camera connected');
-        } catch { /* wait for metadata */ }
       }
     } catch (err: any) {
       const msg = err.name === 'NotAllowedError' ? 'Camera permission denied' : 'Camera access failed';

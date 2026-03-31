@@ -1,31 +1,82 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const apiKey = process.env.GOOGLE_GEMINI_API_KEY;
+const API_KEYS = [
+  process.env.GOOGLE_GEMINI_API_KEY,
+  process.env.GOOGLE_GEMINI_API_KEY_1,
+  process.env.GOOGLE_GEMINI_API_KEY_2,
+].filter(Boolean) as string[];
 
-if (!apiKey) {
-  console.error("❌ GOOGLE_GEMINI_API_KEY is missing!");
+if (API_KEYS.length === 0) {
+  console.error("❌ NO GOOGLE_GEMINI_API_KEY CONFIGURED!");
 }
 
-const genAI = new GoogleGenerativeAI(apiKey || "dummy");
+let currentKeyIndex = 0;
+
+export async function callGeminiWithRotation(prompt: string, modelOptions: any) {
+  if (API_KEYS.length === 0) {
+    throw new Error("No API keys configured");
+  }
+
+  let attempts = 0;
+  const maxAttempts = API_KEYS.length;
+
+  while (attempts < maxAttempts) {
+    const key = API_KEYS[currentKeyIndex];
+    console.log("Using API key index:", currentKeyIndex);
+    
+    try {
+      const genAI = new GoogleGenerativeAI(key);
+      const model = genAI.getGenerativeModel(modelOptions);
+      
+      const result = await model.generateContent(prompt);
+      return result;
+    } catch (error: any) {
+      if (error?.status === 429 || error?.message?.includes("429") || error?.message?.includes("Too Many Requests") || error?.message?.includes("quota")) {
+        console.log("Switching API key due to 429");
+        currentKeyIndex = (currentKeyIndex + 1) % API_KEYS.length;
+        attempts++;
+        if (attempts >= maxAttempts) {
+          console.log("All API keys exhausted");
+          // Return the expected fallback directly mocked as a standard Gemini response
+          return {
+            response: {
+              text: () => JSON.stringify({
+                score: 5,
+                feedback: "Evaluation skipped due to API limit.",
+                verboseFeedback: "Evaluation skipped due to API limit.",
+                spokenResponse: "Let's move to the next question.",
+                strengths: ["Answer submitted"],
+                improvements: ["API limit reached"],
+                confidenceTips: ["API limit reached"]
+              })
+            }
+          } as any;
+        }
+      } else {
+        throw error;
+      }
+    }
+  }
+}
 
 export async function generateInterviewQuestions(
   skill: string,
   difficulty: string = "medium",
   count: number = 10
 ) {
-  if (!apiKey) {
+  if (API_KEYS.length === 0) {
     console.error("❌ Gemini API key not configured");
     return generateFallbackQuestions(skill, count);
   }
 
   try {
-    const model = genAI.getGenerativeModel({
+    const modelOptions = {
       model: "gemini-2.5-flash",
       generationConfig: {
         temperature: 0.7,
         maxOutputTokens: 8192, // ✅ Increased
       },
-    });
+    };
 
     const prompt = `Generate ${count} unique ${difficulty} level interview questions for ${skill}.
 
@@ -34,7 +85,7 @@ IMPORTANT: Return ONLY a valid JSON array, no markdown, no explanations:
 
     console.log("🤖 Generating questions with Gemini...");
 
-    const result = await model.generateContent(prompt);
+    const result = await callGeminiWithRotation(prompt, modelOptions);
 
     if (!result || !result.response) {
       console.error("❌ No response from Gemini API");
@@ -98,7 +149,7 @@ export async function evaluateAnswer(
   skill: string
 ) {
   // Safety checks
-  if (!apiKey) {
+  if (API_KEYS.length === 0) {
     console.error("⚠️ No API key - using fallback");
     return generateFallbackEvaluation();
   }
@@ -109,13 +160,13 @@ export async function evaluateAnswer(
   }
 
   try {
-    const model = genAI.getGenerativeModel({
+    const modelOptions = {
       model: "gemini-2.5-flash",
       generationConfig: {
         temperature: 0.5,
         maxOutputTokens: 8192, // ✅ Increased
       },
-    });
+    };
 
     const prompt = `Evaluate this ${skill} interview answer.
 
@@ -136,7 +187,7 @@ NO markdown, NO code blocks, NO extra text. Just the JSON object.`;
 
     console.log("🤖 Evaluating answer with Gemini...");
 
-    const result = await model.generateContent(prompt);
+    const result = await callGeminiWithRotation(prompt, modelOptions);
 
     // Check if result exists
     if (!result) {
@@ -330,5 +381,109 @@ function generateFallbackEvaluation() {
       "Stay calm and think through problems",
       "Build confidence through consistent practice",
     ],
+  };
+}
+
+// ─────────────────────────────────────────────────────────────
+// CONVERSATIONAL evaluation  ← new
+// ─────────────────────────────────────────────────────────────
+export interface ConversationalEvaluation {
+  score: number;
+  feedback: string;          // short 1-sentence spoken feedback
+  verboseFeedback: string;   // full paragraph for display panel
+  strengths: string[];
+  improvements: string[];
+  confidenceTips: string[];
+  spokenResponse: string;    // what the AI says aloud next (feedback + transition)
+}
+
+export interface ConversationMessage {
+  role: 'interviewer' | 'candidate';
+  text: string;
+}
+
+export async function evaluateAnswerConversational(
+  question: string,
+  answer: string,
+  skill: string,
+  difficulty: string,
+  history: ConversationMessage[]
+): Promise<ConversationalEvaluation> {
+  if (API_KEYS.length === 0) return fallbackConversational();
+
+  try {
+    const modelOptions = {
+      model: "gemini-2.5-flash",
+      generationConfig: { temperature: 0.6, maxOutputTokens: 8192 },
+      systemInstruction: `You are a professional, slightly strict technical interviewer conducting a real-time spoken ${difficulty} ${skill} interview.
+Your personality: concise, constructive, human-like, encouraging but honest.
+Rules:
+- Evaluate the candidate's answer accurately.
+- Give SHORT spoken feedback (1-2 sentences max for "spokenResponse" — this will be read aloud via TTS).
+- Be slightly critical to help the candidate improve.
+- Always transition naturally to acknowledge you're moving on.
+- Keep "feedback" field to 1-2 sentences (spoken).
+- Keep "verboseFeedback" detailed (3-5 sentences, for display only).
+- Return ONLY valid JSON. No markdown. No code blocks.`,
+    };
+
+    // Build conversation history for context
+    const historyText = history.length > 0
+      ? '\n\nPrevious conversation:\n' + history.map(m =>
+          `${m.role === 'interviewer' ? 'Interviewer' : 'Candidate'}: ${m.text}`
+        ).join('\n')
+      : '';
+
+    const prompt = `Evaluate this answer for the question asked.${historyText}
+
+Question: "${question}"
+Candidate's Answer: "${answer}"
+
+Return ONLY this JSON (no extra text):
+{
+  "score": 7,
+  "feedback": "1-2 sentence spoken feedback on this specific answer",
+  "verboseFeedback": "Full detailed paragraph for display",
+  "spokenResponse": "Short spoken transition — brief feedback then signal you're moving on (e.g. 'Good thinking on X. Let's move to the next question.')",
+  "strengths": ["strength 1", "strength 2", "strength 3"],
+  "improvements": ["improvement 1", "improvement 2", "improvement 3"],
+  "confidenceTips": ["tip 1", "tip 2", "tip 3"]
+}`;
+
+    const result = await callGeminiWithRotation(prompt, modelOptions);
+    let text = result.response.text().trim();
+
+    // Strip markdown fences
+    text = text.replace(/```json/gi, '').replace(/```/g, '');
+    const start = text.indexOf('{');
+    const end = text.lastIndexOf('}');
+    if (start === -1 || end === -1) return fallbackConversational();
+
+    const parsed = JSON.parse(text.substring(start, end + 1));
+
+    return {
+      score: Math.min(10, Math.max(1, Number(parsed.score) || 5)),
+      feedback: String(parsed.feedback || ''),
+      verboseFeedback: String(parsed.verboseFeedback || parsed.feedback || ''),
+      spokenResponse: String(parsed.spokenResponse || parsed.feedback || "Let's move to the next question."),
+      strengths: Array.isArray(parsed.strengths) ? parsed.strengths.slice(0, 3).map(String) : ['Answered the question', 'Engaged with the topic', 'Showed effort'],
+      improvements: Array.isArray(parsed.improvements) ? parsed.improvements.slice(0, 3).map(String) : ['Go deeper on concepts', 'Add specific examples', 'Improve clarity'],
+      confidenceTips: Array.isArray(parsed.confidenceTips) ? parsed.confidenceTips.slice(0, 3).map(String) : ['Stay calm', 'Think before speaking', 'Practice daily'],
+    };
+  } catch (e: any) {
+    console.error('Conversational eval error:', e.message);
+    return fallbackConversational();
+  }
+}
+
+function fallbackConversational(): ConversationalEvaluation {
+  return {
+    score: 5,
+    feedback: "Your answer has been recorded. Let's keep going.",
+    verboseFeedback: "Your answer has been recorded. AI evaluation is temporarily unavailable, but your response shows good effort.",
+    spokenResponse: "Thank you for your answer. Let's move on to the next question.",
+    strengths: ['Answer submitted', 'Engaged with question', 'Showed effort'],
+    improvements: ['Review key concepts', 'Add concrete examples', 'Practice more'],
+    confidenceTips: ['Stay calm', 'Think before speaking', 'Practice daily'],
   };
 }
